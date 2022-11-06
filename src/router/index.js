@@ -7,9 +7,9 @@ const routes = [
         name: 'Index',
         component: () =>  import(/* webpackChunkName: "Home" */ '../pages/Index.vue')
     },
-    { path: '/about',
-        name: 'About',
-        component: () =>  import(/* webpackChunkName: "About" */ '../pages/About.vue')
+    { path: '/login',
+        name: 'Login',
+        component: () =>  import(/* webpackChunkName: "Login" */ '../pages/Login.vue')
     },
     { path: '/:pathMatch(.*)*',
         name: 'NotFound',
