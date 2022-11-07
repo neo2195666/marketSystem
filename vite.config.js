@@ -10,5 +10,17 @@ export default defineConfig({
       "~":path.resolve("src"),
     }
   },
+
+  server: {
+    proxy: {
+      '/api': {
+        target: 'http://ceshi13.dishait.cn/',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api/, '')
+      },
+    },
+  },
+
   plugins: [vue(),WindiCSS()]
 })
+

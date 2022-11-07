@@ -428,6 +428,388 @@ for (const [key, component] of Object.entries(ElementPlusIconsVue)) {
 app.mount('#app')
 ```
 
+### 4、优化CSS代码
+
+将在元素中的css代码单独提出来
+
+```vue
+<template>
+  <!--  <el-row class="min-h-screen bg-indigo-500">  -->
+  <el-row class="login-container">
+
+    <!--设置左边欢迎界面-->
+    <!--flex 是WindiCss，代表display使用flex，items-center是垂直居中，justify-center是垂直居中，flex布局是垂直放心:flex-col-->
+    <el-col :lg="16" :md="12" class="left">
+      <div>
+        <!--设置字体的粗体，大小，颜色。设置颜色的时候，如果排版中字体颜色没有想要的，可以使用text-格式+颜色，颜色去颜色面板查找。设置下边距 -->
+        <div>欢迎使用CMDB</div>
+        <div>假作真时真亦假 无为有处有还无。 ————————《红楼梦》</div>
+      </div>
+    </el-col>
+
+    <!--设置右边用户登录模块-->
+    <el-col :lg="8" :md="12" class="right">
+
+      <h2 class="title">欢迎回来</h2>
+      <div>
+        <span class="line"></span>
+        <span class="">账号密码登</span>
+        <span class="line"></span>
+      </div>
+
+      <!--form表单使用element plus提供-->
+      <el-form :model="form" class="w-[250px]">
+
+        <el-form-item :rules="rules">
+          <!--username和password和下面style标签中对应-->
+          <el-input v-model="form.username" placeholder="请输入用户名">
+              <!--使用前置插槽-->
+              <template #prefix>
+                  <el-icon><User /></el-icon>
+              </template>
+          </el-input>
+        </el-form-item>
+
+        <el-form-item >
+            <el-input  v-model="form.password" placeholder="请输入密码">
+                <!--使用前置插槽-->
+                <template #prefix>
+                    <el-icon><Lock /></el-icon>
+                </template>
+            </el-input>
+        </el-form-item>
+
+        <el-form-item>
+          <!--button是element plus提供的组件，可以直接按照element plus提供的来修改 round实现圆角边框，颜色可以对比WindiCss样式来取用-->
+          <el-button round color="#6366f1" type="primary" @click="onSubmit" class="w-[250px]">登录</el-button>
+        </el-form-item>
+
+      </el-form>
+    </el-col>
+
+  </el-row>
+
+</template>
+
+<script scoped setup>
+import { reactive } from 'vue'
+
+// do not use same name with ref
+const form = reactive({
+  name: '',
+  password: ''
+})
+
+const onSubmit = () => {
+  console.log('submit!')
+}
+
+</script>
+
+<style scoped>
+.login-container{
+  @apply min-h-screen bg-indigo-500;
+}
+
+.login-container .left,.login-container .right{
+  @apply flex items-center justify-center;
+}
+
+.login-container .right{
+  @apply bg-light-50 flex-col;
+}
+
+.left>div>div:first-child{
+  @apply font-bold text-5xl text-light-50 mb-4;
+}
+
+.left>div>div:last-child{
+  @apply text-light-50;
+}
+
+.right .title{
+  @apply font-bold text-3xl text-gray-800;
+}
+
+.right>div{
+  @apply flex items-center justify-center my-5 text-gray-300 space-x-2;
+}
+
+.right .line{
+  @apply h-[4px] w-16 bg-gray-200;
+}
+  
+</style>
+```
+
+### 5、表单验证功能
+
+用户名和密码不能为空，密码要使用符号遮盖起来，不能明文
+
+```vue
+<template>
+
+	  <!--在form表单中添加规则，在script标签中定义规则rules;此处的model与script标签中的formRule绑定，保持一直-->
+      <el-form :model="formRule" :rules="rules" class="w-[250px]">
+        
+		<!--prop与script标签中的rules中的username规则绑定，prop是key-->
+        <el-form-item prop="username">
+
+          <el-input v-model="formRule.username" placeholder="请输入用户名">
+
+              <template #prefix>
+                  <el-icon><User /></el-icon>
+              </template>
+          </el-input>
+        </el-form-item>
+
+		<!--prop与script标签中的rules中的password规则绑定，prop是key-->
+        <el-form-item prop="password">
+            
+            <!--type类型设置成password，将密码不再设置成明文，show-password，设置开启和关闭明文显示密码-->
+            <el-input  type="password" show-password v-model="formRule.password" placeholder="请输入密码">
+                <!---->
+                <template #prefix>
+                    <el-icon><Lock /></el-icon>
+                </template>
+            </el-input>
+        </el-form-item>
+
+        <el-form-item>
+          <el-button round color="#6366f1" type="primary" @click="onSubmit" class="w-[250px]">登录</el-button>
+        </el-form-item>
+
+      </el-form>
+    </el-col>
+
+  </el-row>
+
+</template>
+
+<script scoped setup>
+import { reactive } from 'vue'
+
+const formRule = reactive({
+  username: "",
+  password: ""
+})
+
+//设置的规则与的form中的对象要一一对应
+const rules = {
+  username:[
+      { 
+        required: true,
+        message: '用户名不能为空', 
+        trigger: 'blur'
+       },
+  ],
+  password:[
+          { 
+        required: true,
+        message: '密码不能为空', 
+        trigger: 'blur'
+       },
+  ]
+}
+
+const onSubmit = () => {
+  console.log('submit!')
+}
+</script>
+```
+
+### 6、异步登录axios
+
+1、安装axios
+
+```bash
+#安装axios
+npm install axios
+```
+
+2、在工程根目录下创建axios的js文件
+
+```js
+import axios from 'axios'
+
+const service = axios.create({
+    baseURL:"/api"
+})
+
+export default service
+```
+
+3、创建api目录，存放工程的api，然后创建manager.js登录接口
+
+```js
+import axios from "../axios"
+
+export function login(username,password){
+    return axios.post("/admin/login",{
+        username,
+        password
+    })
+}
+```
+
+4、vite.config.js中配置服务器代理，解决跨域问题
+
+```js
+import { defineConfig } from 'vite'
+import vue from '@vitejs/plugin-vue'
+import WindiCSS from 'vite-plugin-windicss'
+import path from 'path'
+
+// https://vitejs.dev/config/
+export default defineConfig({
+  resolve:{
+    alias:{
+      "~":path.resolve("src"),
+    }
+  },
+
+  server: {
+    proxy: {
+      '/api': {
+        target: 'http://ceshi13.dishait.cn/',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api/, '')
+      },
+    },
+  },
+
+  plugins: [vue(),WindiCSS()]
+})
+```
+
+5、在Login页面导入axios实现登录验证
+
+```vue
+<template>
+  <el-row class="login-container">
+
+    <!--设置左边欢迎界面-->
+    <el-col :lg="16" :md="12" class="left">
+
+    </el-col>
+
+    <!--设置右边用户登录模块-->
+    <el-col :lg="8" :md="12" class="right">
+
+      <!--通过formRef拿到form表单节点，然后可以拿到form表单提交的数据-->
+      <el-form ref= formRef :model="form"  :rules="rules" class="w-[250px]">
+
+      </el-form>
+        
+    </el-col>
+      
+  </el-row>
+
+</template>
+
+<script scoped setup>
+import { ref,reactive } from 'vue'
+import { login } from '../api/manager.js'
+
+//导入element plus 的UI库
+import { ElNotification } from 'element-plus'
+    
+//导入vue-router路由
+import { useRouter } from 'vue-router'
+
+//表单提交后，先通过这个formRef拿到这个form表达的节点，然后拿到提交的数据进行验证
+const router = useRouter()
+
+const form = reactive({
+  username: "",
+  password: ""
+})
+
+const formRef = ref(null)
+
+//本节重点
+//点击提交
+const onSubmit = () => {
+  //先进行参数验证，参数不能为空
+  formRef.value.validate((valid) => {
+    if(!valid){
+      return false
+    }
+  })
+
+  //调用login登录api
+  login(form.username,form.password)
+  .then( res => {
+      //ElNotification是element plus的UI组件
+      ElNotification({
+          message: '登录成功',
+          type: 'success',
+      })
+
+      //登录成功后跳转到后台首页
+      router.push("/")
+  })
+  .catch( err => {
+      ElNotification({
+          title: 'Error',
+          message: err.response.data.msg || "登录失败",
+          type: 'error',
+      })
+  })
+}
+
+</script>
+```
+
+### 7、使用cookie存储用户token
+
+1、安装vue工具库vueuse
+
+```bash
+#先安装cookie工具以来的库
+npm i @vueuse/integrations
+
+#安装vueuse的cookie
+npm i universal-cookie
+```
+
+```js
+<script scoped setup>
+
+//1、引入cookie
+import { useCookies } from '@vueuse/integrations/useCookies'
+/2、/创建cookie
+const cookie = useCookies()
+
+const onSubmit = () => {
+  formRef.value.validate((valid) => {
+    if(!valid){
+      return false
+    }
+  })
+
+  login(form.username,form.password)
+  .then( res => {
+      ElNotification({
+          message: '登录成功',
+          type: 'success',
+      })
+	   //3、登录成功后，设置cookie
+      cookie.set("admin-token-a1",res.data.data.token)
+
+      router.push("/")
+  })
+  .catch( err => {
+      ElNotification({
+          title: 'Error',
+          message: err.response.data.msg || "登录失败",
+          type: 'error',
+      })
+  })
+}
+</script>
+```
+
 
 
 
