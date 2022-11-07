@@ -778,7 +778,7 @@ npm i universal-cookie
 
 //1、引入cookie
 import { useCookies } from '@vueuse/integrations/useCookies'
-/2、/创建cookie
+//2、创建cookie
 const cookie = useCookies()
 
 const onSubmit = () => {
