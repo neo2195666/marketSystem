@@ -2,9 +2,9 @@
 
 ## 一、环境准备
 
-## 1、安装node.js
+### 1、安装node.js
 
-## 2、打开工程目录，创建vite项目
+### 2、打开工程目录，创建vite项目
 
 ```bash
 npm create vite@latest marketSystem -- --template vue
@@ -14,7 +14,7 @@ npm install
 npm run dev
 ```
 
-## 3、引入element UI 库
+### 3、引入element UI 库
 
 打开element plus 官网，找到安装步骤（element UI和Element plus是不一样的，要选择正确的ui库安装）
 
@@ -51,7 +51,7 @@ Volar 支持
 }
 ```
 
-## 4、引入windicss框架
+### 4、引入windicss框架
 
 打开windicss官网，找到安装命令
 
@@ -77,7 +77,7 @@ export default {
 import 'virtual:windi.css'
 ```
 
-## 5、安装vue-router
+### 5、安装vue-router
 
 打开vue-router官网，复制安装命令
 
@@ -209,4 +209,230 @@ const router = createRouter({
 
 export default router
 ```
+
+## 二、登录页面设计
+
+### 1、页面设计
+
+页面设计，先从布局开始，逐层往下深入，具体实现
+
+1、先将框架生成的style.css文件注释掉，不要引用进去
+
+2、新建一个login组建，配置路由。
+
+3、默认情况下flex将布局分成24格，我们采用左边16格，右边8格子来实现布局，设置整体的CSS样式
+
+4、设置左边欢迎使用和CSS样式
+
+5、设置右边用户登录和CSS央视，表单使用element plus提供的表单
+
+```vue
+<template>
+  <!--  <el-row class="min-h-screen bg-indigo-500">  -->
+  <el-row style="min-height: 100vh;" class="bg-indigo-500">
+
+    <!--设置左边欢迎界面-->
+    <!--flex 是WindiCss，代表display使用flex，items-center是垂直居中，justify-center是垂直居中，flex布局是垂直放心:flex-col-->
+    <el-col :span="16" class="flex items-center justify-center flex-col">
+      <div>
+        <!--设置字体的粗体，大小，颜色。设置颜色的时候，如果排版中字体颜色没有想要的，可以使用text-格式+颜色，颜色去颜色面板查找。设置下边距 -->
+        <div class="font-bold text-5xl text-light-50 mb-4">欢迎使用CMDB</div>
+        <div class="text-light-50">假作真时真亦假 无为有处有还无。 ————————《红楼梦》</div>
+      </div>
+    </el-col>
+
+    <!--设置右边用户登录模块-->
+    <el-col :span="8" class="bg-light-50 flex items-center justify-center flex-col">
+      <h2 class="font-bold text-3xl text-gray-800">欢迎回来</h2>
+      <div class="flex items-center justify-center my-5 text-gray-300 space-x-2">
+        <span class="h-[4px] w-16 bg-gray-200"></span>
+        <span class="">账号密码登</span>
+        <span class="h-[4px] w-16 bg-gray-200"></span>
+      </div>
+
+      <!--form表单使用element plus提供-->
+      <el-form :model="form" class="w-[250px]">
+        <el-form-item >
+          <!--username和password和下面style标签中对应-->
+          <el-input v-model="form.username" placeholder="请输入用户名"/>
+        </el-form-item>
+
+        <el-form-item >
+          <el-input v-model="form.password" placeholder="请输入密码"/>
+        </el-form-item>
+
+        <el-form-item>
+          <!--button是element plus提供的组件，可以直接按照element plus提供的来修改 round实现圆角边框，颜色可以对比WindiCss样式来取用-->
+          <el-button round color="#6366f1" type="primary" @click="onSubmit" class="w-[250px]">登录</el-button>
+        </el-form-item>
+        
+      </el-form>
+    </el-col>
+
+  </el-row>
+
+</template>
+
+<script scoped setup>
+import { reactive } from 'vue'
+
+// do not use same name with ref
+const form = reactive({
+  name: '',
+  password: ''
+})
+
+const onSubmit = () => {
+  console.log('submit!')
+}
+
+</script>
+```
+
+### 2、响应式布局
+
+当前页面只能在全屏或最大化的时候浏览器中才可以正常显示，一旦使用h5，或者拖动浏览器大小，样式就会错乱，所以要进行响应式布局的设定，使页面在窗口状态改变的情况下，自动适应大小。使用element plus的layout布局中的响应式布局来进行设置。这里使用md和lg规格，将登录页面中左右分布的布局，在属性中加上
+
+```vue
+<template>
+  <el-row style="min-height: 100vh;" class="bg-indigo-500">
+
+    <!--设置左边欢迎界面-->
+    <!--设置响应式布局lg和md-->
+    <el-col :lg="16" :md="12" class="flex items-center justify-center flex-col">
+      <div>
+      </div>
+    </el-col>
+
+    <!--设置右边用户登录模块-->
+    <!--设置响应式布局lg和md-->
+    <el-col :lg="8" :md="12" class="bg-light-50 flex items-center justify-center flex-col">
+      <div>
+      </div>
+    </el-col>
+
+  </el-row>
+</template>
+```
+
+### 3、引入icon图标库
+
+在网站中如果使用图片icon，例如在登录页面的用户名和密码中引入两个icon可以使用element plus提供的icon库
+
+```bash
+#安装element plus 的icon库
+npm install @element-plus/icons-vue
+```
+
+引入图标有三种方式，第一种在class属性中直接引用
+
+```vue
+<template>
+      <el-form :model="form" class="w-[250px]">
+        <el-form-item >
+          <!--:prefix-icon 会使图片展示在文本框的最前-->
+          <!--:suffix-icon 会使图片展示在文本框的最后-->
+          <el-input :prefix-icon="User" v-model="form.username" placeholder="请输入用户名"/>
+        </el-form-item>
+
+        <el-form-item >
+          <el-input :prefix-icon="Lock" v-model="form.password" placeholder="请输入密码"/>
+        </el-form-item>
+
+      </el-form>
+</template>
+
+<script scoped setup>
+//导入icon图标
+import { User, Lock } from '@element-plus/icons-vue'
+</script>
+```
+
+第二种使用插槽模式，引入template模板
+
+```vue
+<template>
+      <el-form :model="form" class="w-[250px]">
+        
+          <el-input v-model="form.username" placeholder="请输入用户名">
+            
+              <template #prefix>
+                  <el-icon><User /></el-icon>
+              </template>
+          </el-input>
+        </el-form-item>
+
+        <el-form-item >
+          <el-input  v-model="form.password" placeholder="请输入密码">
+              <template #prefix>
+                  <el-icon><Lock /></el-icon>
+              </template>
+          </el-input>
+        </el-form-item>
+
+      </el-form>
+</template>
+
+<script scoped setup>
+//导入icon图标
+import { User, Lock } from '@element-plus/icons-vue'
+
+</script>
+```
+
+第三种使用全局引入方式
+
+```vue
+<template>
+      <el-form :model="form" class="w-[250px]">
+        
+          <el-input v-model="form.username" placeholder="请输入用户名">
+            
+              <template #prefix>
+                  <el-icon><User /></el-icon>
+              </template>
+          </el-input>
+        </el-form-item>
+
+        <el-form-item >
+          <el-input  v-model="form.password" placeholder="请输入密码">
+              <template #prefix>
+                  <el-icon><Lock /></el-icon>
+              </template>
+          </el-input>
+        </el-form-item>
+
+      </el-form>
+</template>
+```
+
+在main.js中引入全局
+
+方式一，方式二使用方式不变，不再需要在script标签中使用
+
+```js
+import { createApp } from 'vue'
+//导入element plus 的icon库
+import * as ElementPlusIconsVue from '@element-plus/icons-vue'
+import ElementPlus from 'element-plus'
+import 'element-plus/dist/index.css'
+import router from './router'
+import 'virtual:windi.css'
+import App from './App.vue'
+
+const app = createApp(App).use(ElementPlus).use(router)
+//在app挂载前全局引入
+for (const [key, component] of Object.entries(ElementPlusIconsVue)) {
+    app.component(key, component)
+}
+app.mount('#app')
+```
+
+
+
+
+
+
+
+
 
