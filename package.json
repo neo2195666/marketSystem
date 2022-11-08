@@ -15,7 +15,8 @@
     "element-plus": "^2.2.19",
     "universal-cookie": "^4.0.4",
     "vue": "^3.2.41",
-    "vue-router": "^4.0.13"
+    "vue-router": "^4.0.13",
+    "vuex": "^4.0.2"
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^3.2.0",

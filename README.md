@@ -588,7 +588,8 @@ const onSubmit = () => {
 
 <script scoped setup>
 import { reactive } from 'vue'
-
+const loading = ref(fas)
+  
 const formRule = reactive({
   username: "",
   password: ""
@@ -810,7 +811,346 @@ const onSubmit = () => {
 </script>
 ```
 
+### 8、axios拦截器
 
+在axios.js文件中添加登录拦截器和请求拦截器
+
+```bash
+import axios from 'axios'
+import {ElNotification} from "element-plus";
+import { useCookies } from '@vueuse/integrations/useCookies'
+
+const service = axios.create({
+    baseURL:"/api"
+})
+
+// 添加请求拦截器
+service.interceptors.request.use(function (config) {
+    // 在发送请求之前做些什么
+
+    //往header添加cookie
+    const cookie = useCookies()
+    const token = cookie.get("admin-token-a1")
+    if(token){
+        config.headers["token"] = token
+    }
+
+    return config;
+}, function (error) {
+    // 对请求错误做些什么
+    return Promise.reject(error);
+});
+
+// 添加响应拦截器
+service.interceptors.response.use(function (response) {
+    // 对响应数据做点什么
+    return response.data.data;
+}, function (error) {
+    // 对响应错误做点什么
+    ElNotification({
+        title: 'Error',
+        message: error.response.data.msg || "登录失败",
+        type: 'error',
+    })
+    return Promise.reject(error);
+});
+
+export default service
+```
+
+在login组件中，登录成功后，获取用户组建信息.
+
+登录按钮设置一个登录状态
+
+```vue
+<template>
+
+  <el-row class="login-container">
+
+    <!--设置左边欢迎界面-->
+    <el-col :lg="16" :md="12" class="left">
+
+      <div>
+
+        <div>欢迎使用CMDB</div>
+        <div>假作真时真亦假 无为有处有还无。 ————————《红楼梦》</div>
+      </div>
+    </el-col>
+
+    <!--设置右边用户登录模块-->
+    <el-col :lg="8" :md="12" class="right">
+
+      <h2 class="title">欢迎回来</h2>
+      <div>
+        <span class="line"></span>
+        <span class="">账号密码登</span>
+        <span class="line"></span>
+      </div>
+
+      <el-form ref= formRef :model="form"  :rules="rules" class="w-[250px]">
+
+        <el-form-item prop="username">
+
+          <el-input v-model="form.username" placeholder="请输入用户名">
+
+              <template #prefix>
+                  <el-icon><User /></el-icon>
+              </template>
+          </el-input>
+        </el-form-item>
+
+        <el-form-item prop="password">
+            <el-input  type="password" show-password v-model="form.password" placeholder="请输入密码">
+
+                <template #prefix>
+                    <el-icon><Lock /></el-icon>
+                </template>
+            </el-input>
+        </el-form-item>
+
+        <el-form-item>
+          <!--给登录按钮设置一个登录状态-->
+          <el-button round color="#6366f1" type="primary" @click="onSubmit" class="w-[250px]" :loading="loading">登录</el-button>
+        </el-form-item>
+
+      </el-form>
+    </el-col>
+
+  </el-row>
+
+</template>
+
+<script scoped setup>
+import { ref,reactive } from 'vue'
+import { login,getInfo } from '../api/manager.js'
+import { ElNotification } from 'element-plus'
+import { useRouter } from 'vue-router'
+
+import { useCookies } from '@vueuse/integrations/useCookies'
+
+const cookie = useCookies()
+
+const router = useRouter()
+
+const form = reactive({
+  username: "",
+  password: ""
+})
+
+const rules = {
+  username:[
+      { 
+        required: true,
+        message: '用户名不能为空', 
+        trigger: 'blur'
+       },
+  ],
+  password:[
+          { 
+        required: true,
+        message: '密码不能为空', 
+        trigger: 'blur'
+       },
+  ]
+}
+
+const formRef = ref(null)
+//登录按钮状态设置
+const loading = ref(false)
+
+const onSubmit = () => {
+  formRef.value.validate((valid) => {
+    if(!valid){
+      return false
+    }
+  })
+  //打开登录按钮状态
+  loading.value = true
+  login(form.username,form.password)
+  .then( res => {
+      console.log(res);
+
+      ElNotification({
+          message: '登录成功',
+          type: 'success',
+      })
+
+      cookie.set("admin-token-a1",res.token)
+
+    //获取用户登录信息
+    getInfo().then(res2 => {
+      console.log(res2)
+    })
+      router.push("/")
+  })
+    .finally(() => {
+    //关闭登录按钮状态
+    loading.value = false
+  })
+}
+</script>
+```
+
+### 9、常用工具库封装
+
+新建composable目录，新建一个auth.js,
+
+将cookie功能封装一下,然后再login组建中和axios.js中引入
+
+```js
+import { useCookies } from '@vueuse/integrations/useCookies'
+
+const TokenKey = "admin-token"
+const cookie = useCookies()
+
+//获取token
+export function getToken(){
+    return cookie.get(TokenKey)
+}
+
+//设置token
+export function setToken(token){
+    return cookie.set(TokenKey,token)
+}
+
+//删除token
+export function removeToken(){
+    return cookie.remove(TokenKey)
+}
+```
+
+将login.vue中的设置cookie代码改成
+
+```vue
+setToken(res.token)
+```
+
+
+
+将登录成功失败的通知封装成工具类，创建一个utils.js,再axios.js，和login.vue中修改优化一下代码
+
+```js
+import { ElNotification } from 'element-plus'
+
+export function loginSuccessMsg(){
+    ElNotification({
+        message: '登录成功',
+        type: 'success',
+    })
+}
+
+export function loginFailMsg(error){
+    ElNotification({
+        title: 'Error',
+        message: error.response.data.msg || "登录失败",
+        type: 'error',
+    })
+}
+
+export function loginFirst(error){
+    ElNotification({
+        title: 'Error',
+        message: "请先登录",
+        type: 'error',
+    })
+}
+```
+
+### 10、vuex管理状态信息
+
+用户登录成功后，保存用户的登录状态信息，共享给其他页面，让用户可以在登录状态下访问其他页面
+
+```bash
+#安装vuex
+npm install vuex@next --save
+```
+
+新建一个sotre目录，新建一个index.js
+
+```js
+import { createStore } from 'vuex'
+
+// 创建一个新的 store 实例
+const store = createStore({
+    state () {
+        return {
+            user:{}
+        }
+    },
+    mutations: {
+    //记录用户信息
+        SET_USERINFO(state,user){
+            state.user = user
+        }
+    }
+})
+
+export default store
+```
+
+在main.js中引入store
+
+```js
+import store from "~/store/index.js";
+
+const app = createApp(App).use(store)
+
+app.mount('#app')
+```
+
+在login中导入store，存储用户信息
+
+```js
+<script>
+import { useStore } from 'vuex'
+const store = useStore()
+  
+//在on_submit（）提交按钮函数中，登录成功后，设置cookie后，获取用户登录信息的时候，可以使用store，存储用户登录xin xi
+
+          //存储cookie
+          setToken(res.token)
+
+          //获取用户登录信息
+          getInfo().then(res2 => {
+            store.commit("SET_USERINFO",res2)
+            console.log(res2)
+          })
+
+  </script>
+```
+
+### 11、全局导航守卫拦截登录判断
+
+根目录下创建permission.js来配置权限验证相关的内容
+
+```js
+import router from "~/router"
+import { getToken } from "~/composable/auth.js";
+import { loginFirst} from "~/composable/utils.js";
+
+//配置全局前置守卫
+router.beforeEach((to, from,next) => {
+    //如果token不存在，证明没有登录，并且要去的页面不是login，那么钩子函数会跳转到登录页面
+    const token = getToken();
+    if(!token && to.path != "/login"){
+        loginFirst()
+        return next({path:"/login"})
+    }
+
+    //如果token存在，证明已经登录，这时不需要进入登录页面
+    if(token && to.path == "/login"){
+        //如果要返回的页面不存在，那就强制跳转到登录页
+        return next({path: from.path ? from.path : "/login"})
+    }
+    next()
+})
+```
+
+在main.jsz中导入权限管理的js
+
+```js
+import 'element-plus/dist/index.css'
+```
 
 
 
