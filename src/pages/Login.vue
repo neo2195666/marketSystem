@@ -59,19 +59,14 @@
 
 </template>
 
-<script scoped setup>
-import { ref,reactive } from 'vue'
-import { login,getInfo } from '../api/manager.js'
-import { loginSuccessMsg } from '../composable/utils.js'
+<script setup>
+import { ref,reactive,onMounted,onBeforeUnmount } from 'vue'
+import { SuccessMsg } from '../composable/utils.js'
 import { useRouter } from 'vue-router'
 import { useStore } from 'vuex'
 
-//引入cookie
-import {setToken} from "~/composable/auth.js";
-
 const router = useRouter()
 
-// do not use same name with ref
 const form = reactive({
   username: "",
   password: ""
@@ -108,28 +103,29 @@ const onSubmit = () => {
     }
     loading.value = true
     //调用登录的api
-    login(form.username,form.password)
-        .then( res => {
-          console.log(res);
-
-          loginSuccessMsg();
-
-          //存储cookie
-          setToken(res.token)
-
-          //获取用户登录信息
-          getInfo().then(res2 => {
-            store.commit("SET_USERINFO",res2)
-            console.log(res2)
-          })
-          router.push("/")
-        })
-
-        .finally(() => {
+    store.dispatch("login",form).then( () => {
+      SuccessMsg("登录成功");
+      router.push("/")
+    }).finally(() => {
           loading.value = false
         })
   })
 }
+
+//监听回车
+function onKeyUp(e){
+  if(e.key == "Enter") onSubmit()
+}
+
+//添加键盘监听事件
+onMounted( () => {
+    document.addEventListener("keyup",onKeyUp)
+})
+
+//退出前移除键盘监听
+onBeforeUnmount(() => {
+    document.removeEventListener("keyup",onKeyUp)
+})
 
 </script>
 

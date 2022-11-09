@@ -10,3 +10,8 @@ export function login(username,password){
 export function getInfo(){
     return axios.post("/admin/getinfo")
 }
+
+//添加退出登录的api
+export function logoutApi(){
+    return axios.post("/admin/logout")
+}

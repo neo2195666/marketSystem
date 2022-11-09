@@ -1152,6 +1152,270 @@ router.beforeEach((to, from,next) => {
 import 'element-plus/dist/index.css'
 ```
 
+### 12、登录功能完善
+
+优化内容1，当前，登录成功后可以获取用户信息，但是当页面刷新以后，将无法获得。所以需要在store中存储获取用户信息；优化内容2：将login代码放到store里面；优化内容3:添加回车键盘监听记录，实现回车键响应登录.
+
+在store目录中index.js中添加如下内容
+
+```js
+import { createStore } from 'vuex'
+import {getInfo, login} from "~/api/manager.js";
+import {setToken} from "~/composable/auth.js";
+
+const store = createStore({
+    state () {
+        return {
+            user:{}
+        }
+    },
+    mutations: {
+        SET_USERINFO(state,user){
+            state.user = user
+        }
+    },
+    actions: {
+        //登录功能
+        login({commit},{ username,password }){
+            return new Promise( (resolve, reject) => {
+                login(username,password).then( res => {
+                    //存储cookie
+                    setToken(res.token)
+                    console.log("打印token:" + res.token)
+                    resolve(res)
+
+                }).catch(err => reject(err))
+            })
+        },
+
+        //获取当前登录的用户信息
+        getInfo({commit}){
+            return new Promise((resolve,reject) => {
+                getInfo().then(res => {
+                    //调用SET_USERINFO函数，将信息赋值给state中的user
+                    commit("SET_USERINFO",res)
+                    resolve(res)
+                }).catch(err => reject(err))
+            })
+        }
+    }
+})
+
+export default store
+```
+
+将登录页面login中的，登录成功后获取用户信息删掉。
+
+在路由权限管理的permission.js中，登录成功后，添加获取用户信息。
+
+```js
+import router from "./router"
+import { getToken } from "~/composable/auth.js";
+import { loginFirst} from "~/composable/utils.js";
+import store from "~/store/index.js";
+
+
+router.beforeEach(async (to, from,next) => {
+
+    const token = getToken();
+    if(!token && to.path != "/login"){
+        loginFirst()
+        return next({path:"/login"})
+    }
+    
+    if(token && to.path == "/login"){
+        return next({path: from.path ? from.path : "/login"})
+    }
+
+    //如果已经登录，获取并且保存用户信息到store中
+    if(token){
+        //在store中action存储的函数，在这里要使用dispatch来调度。这里使用await的时候，在钩子函数的参数中要添加async
+        await store.dispatch("getInfo")
+    }
+
+    next()
+})
+```
+
+修改login登录页面
+
+```vue
+<script scoped setup>
+  //导入钩子进行键盘监听事件
+import { ref,reactive,onMounted,onBeforeUnmount } from 'vue'
+import { loginSuccessMsg } from '../composable/utils.js'
+import { useRouter } from 'vue-router'
+import { useStore } from 'vuex'
+
+const router = useRouter()
+
+const form = reactive({
+  username: "",
+  password: ""
+})
+
+const rules = {
+  username:[
+      { 
+        required: true,
+        message: '用户名不能为空', 
+        trigger: 'blur'
+       },
+  ],
+  password:[
+          { 
+        required: true,
+        message: '密码不能为空', 
+        trigger: 'blur'
+       },
+  ]
+}
+const formRef = ref(null)
+const loading = ref(false)
+const store = useStore()
+
+const onSubmit = () => {
+
+  formRef.value.validate((valid) => {
+    if(!valid){
+      return false
+    }
+    loading.value = true
+    //login账号登录
+    store.dispatch("login",form).then( res => {
+      loginSuccessMsg();
+      router.push("/")
+    }).finally(() => {
+          loading.value = false
+        })
+  })
+}
+
+//监听回车
+function onKeyUp(e){
+  if(e.key == "Enter") onSubmit()
+}
+
+//添加键盘监听事件
+onMounted( () => {
+    document.addEventListener("keyup",onKeyUp)
+})
+
+//退出前移除键盘监听
+onBeforeUnmount(() => {
+    document.removeEventListener("keyup",onKeyUp)
+})
+```
+
+13、退出登录功能
+
+在login页面添加退出登录按钮,绑定到logout函数里面
+
+```vue
+<template>
+  <div>
+    后台首页
+    <el-button @click="logout">退出登录</el-button>
+    <div>{{ $store.state.user }}</div>
+  </div>
+</template>
+
+<script setup>
+import {logoutFunction, SuccessMsg} from "~/composable/utils.js";
+import router from "~/router/index.js";
+//导入退出登录的额api函数
+import { logoutApi } from "~/api/manager.js";
+//导入store来
+import {useStore} from 'vuex'
+
+const store = useStore()
+function logout(){
+    logoutFunction("是否要退出登录",).then( res => {
+      logoutApi().finally(res => {
+
+        store.dispatch("logoutAction")
+
+        //跳转回登录页面
+        router.push("/login")
+        //提示退出成功
+        SuccessMsg("退出登录成功！准备去🍺")
+      })
+      console.log("退出登录成功")
+    })
+}
+
+</script>
+```
+
+在utils.js中添加登录按钮的响应功能
+
+```js
+//导入消息盒子
+import { ElNotification,ElMessageBox } from 'element-plus'
+
+//添加退出登录按钮内容
+export function logoutFunction(context = "提示内容",type = "Warning",title = ""){
+    return  ElMessageBox.confirm(
+        context,
+        title,
+        {
+            confirmButtonText: '确认',
+            cancelButtonText: '取消',
+            type
+        }
+    )
+}
+```
+
+在manager.js中添加退出登录api
+
+```js
+//添加退出登录的api
+export function logoutApi(){
+    return axios.post("/admin/logout")
+}
+```
+
+在store中的index.js中的action添加清空用户数据的方法
+
+```js
+import { createStore } from 'vuex'
+import {getInfo, login} from "~/api/manager.js";
+import { setToken,removeToken } from "~/composable/auth.js";
+
+const store = createStore({
+    state () {
+        return {
+            user:{}
+        }
+    },
+    mutations: {
+        SET_USERINFO(state,user){
+            state.user = user
+        }
+    },
+  
+    actions: {
+        //退出登录的logout
+        logoutAction({ commit }){
+            //移除cookie中的token
+            removeToken()
+            //清除当前用户状态,清除store，state中的user
+            commit("SET_USERINFO",{})
+        }
+        //第二种清空用户数据的方法
+        // logoutAction(state){
+        //     //移除cookie中的token
+        //     removeToken()
+        //     //清除当前用户状态,清除store，state中的user
+        //     state.user = {}
+        // }
+    }
+})
+
+export default store
+```
+
 
 
 
