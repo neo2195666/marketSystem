@@ -1,10 +1,14 @@
 import router from "./router"
 import { getToken } from "~/composable/auth.js";
-import { loginFirst} from "~/composable/utils.js";
+import { loginFirst,showFullLoading,hideFullLoading } from "~/composable/utils.js";
 import store from "~/store/index.js";
+
 
 //配置全局前置守卫
 router.beforeEach(async (to, from,next) => {
+    //显示loading进度条
+    showFullLoading()
+
     //如果token不存在，证明没有登录，并且要去的页面不是login，那么钩子函数会跳转到登录页面
     const token = getToken();
     if(!token && to.path != "/login"){
@@ -24,5 +28,12 @@ router.beforeEach(async (to, from,next) => {
         await store.dispatch("getInfo")
     }
 
+    //设置页面标题
+    let title = to.meta.title ? to.meta.title : ""
+    document.title = title
+
     next()
 })
+
+//全局后置钩子结束进度条
+router.afterEach((to, from) => hideFullLoading())

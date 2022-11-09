@@ -1,5 +1,6 @@
 //导入消息盒子
 import { ElNotification,ElMessageBox } from 'element-plus'
+import nprogress from 'nprogress'
 
 export function SuccessMsg(title){
     ElNotification({
@@ -10,7 +11,6 @@ export function SuccessMsg(title){
 
 export function loginFailMsg(error){
     ElNotification({
-        title: 'Error',
         message: error.response.data.msg || "登录失败",
         type: 'error',
     })
@@ -18,7 +18,6 @@ export function loginFailMsg(error){
 
 export function loginFirst(){
     ElNotification({
-        title: 'Error',
         message: "兄弟，你得先登录!",
         type: 'error',
     })
@@ -35,4 +34,15 @@ export function logoutFunction(context = "提示内容",type = "Warning",title =
             type
         }
     )
+}
+
+//显示全屏loading
+export function showFullLoading(){
+    nprogress.start()
+}
+
+
+//隐藏全屏loading
+export function hideFullLoading(){
+    nprogress.done()
 }

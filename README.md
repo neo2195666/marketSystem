@@ -1307,7 +1307,7 @@ onBeforeUnmount(() => {
 })
 ```
 
-13、退出登录功能
+### 13、退出登录功能
 
 在login页面添加退出登录按钮,绑定到logout函数里面
 
@@ -1338,9 +1338,9 @@ function logout(){
         //跳转回登录页面
         router.push("/login")
         //提示退出成功
-        SuccessMsg("退出登录成功！准备去🍺")
+        SuccessMsg("退出成功！准备去🍺")
       })
-      console.log("退出登录成功")
+      console.log("退出成功")
     })
 }
 
@@ -1416,9 +1416,102 @@ const store = createStore({
 export default store
 ```
 
+### 14、全局loading加载进度条
+
+```bash
+#安装NProgress,可以在https://www.npmjs.com/中检索模块
+npm i nprogress
+```
+
+在main.js中导入
+
+```js
+import "../node_modules/nprogress/nprogress.css"
+```
+
+在util.js中设置进度条函数
+
+```js
+import nprogress from 'nprogress'
 
 
+//显示全屏loading
+export function showFullLoading(){
+    nprogress.start()
+}
 
+
+//隐藏全屏loading
+export function hideFullLoading(){
+    nprogress.done()
+}
+```
+
+在权限配置permission.js中配置钩子函数
+
+```js
+import { loginFirst,showFullLoading,hideFullLoading } from "~/composable/utils.js";
+
+//配置全局前置守卫
+router.beforeEach(async (to, from,next) => {
+    //显示loading进度条
+    showFullLoading()
+
+    next()
+})
+
+//全局后置钩子结束进度条
+router.afterEach((to, from) => hideFullLoading())
+```
+
+可以在app.vue中修改一下进度条的样式
+
+```vue
+<style scoped>
+#nprogress .bar{
+  background: #6fff71!important;
+  height: 3px!important;
+}
+</style>
+```
+
+### 15、动态页面标题实现
+
+在路由配置中，为每个页面添加一个meta.title的页面标题属性
+
+```js
+import { createRouter, createWebHashHistory } from 'vue-router'
+
+const routes = [
+    { path: '/',
+        name: 'Index',
+        component: () =>  import(/* webpackChunkName: "Home" */ '../pages/Index.vue'),
+     	//添加一个meta.title的页面标题属性
+        meta:{
+            title : "后台首页"
+        }
+    },
+    { path: '/login',
+        name: 'Login',
+        component: () =>  import(/* webpackChunkName: "Login" */ '../pages/Login.vue'),
+    	//添加一个meta.title的页面标题属性
+        meta:{
+            title : "用户登录"
+        }
+    },
+    { path: '/:pathMatch(.*)*',
+        name: 'NotFound',
+        component: () =>  import(/* webpackChunkName: "NotFound" */ '../pages/404.vue')
+    },
+]
+
+const router = createRouter({
+    history: createWebHashHistory(),
+    routes, // `routes: routes` 的缩写
+})
+
+export default router
+```
 
 
 

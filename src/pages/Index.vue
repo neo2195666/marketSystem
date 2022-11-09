@@ -2,7 +2,7 @@
   <div>
     后台首页
     <el-button @click="logout">退出登录</el-button>
-    <div>{{ $store.state.user }}</div>
+    <!-- <div>{{ $store.state.user }}</div> -->
   </div>
 </template>
 

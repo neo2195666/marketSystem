@@ -5,11 +5,17 @@ import { createRouter, createWebHashHistory } from 'vue-router'
 const routes = [
     { path: '/',
         name: 'Index',
-        component: () =>  import(/* webpackChunkName: "Home" */ '../pages/Index.vue')
+        component: () =>  import(/* webpackChunkName: "Home" */ '../pages/Index.vue'),
+        meta:{
+            title : "后台首页"
+        }
     },
     { path: '/login',
         name: 'Login',
-        component: () =>  import(/* webpackChunkName: "Login" */ '../pages/Login.vue')
+        component: () =>  import(/* webpackChunkName: "Login" */ '../pages/Login.vue'),
+        meta:{
+            title : "用户登录"
+        }
     },
     { path: '/:pathMatch(.*)*',
         name: 'NotFound',
