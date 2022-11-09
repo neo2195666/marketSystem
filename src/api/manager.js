@@ -15,3 +15,8 @@ export function getInfo(){
 export function logoutApi(){
     return axios.post("/admin/logout")
 }
+
+//修改密码api
+export function updatePassword(data){
+    return axios.post("/admin/updatepassword",data)
+}

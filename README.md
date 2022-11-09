@@ -1513,5 +1513,482 @@ const router = createRouter({
 export default router
 ```
 
+## 三、后台全局layout布局开发
+
+### 1、后台布局规划
+
+创建一个layout目录，并在里面创建admin.vue，后台管理组件
+
+```vue
+<template>
+<!-- 外层使用element plus提供的容器组件来布局 -->
+        <el-container>
+                <!-- 头部部分 -->
+                <el-header>
+                        <!-- 头部导航栏 -->
+                        <f-header></f-header>
+                </el-header>
+                <!-- 侧边栏和主题放到一个容器内 -->
+
+                <el-container>
+                        <el-aside>
+                            <!-- 侧边栏 -->
+                            <f-menu></f-menu>
+                        </el-aside>  
+
+                        //主容器分标签导航栏
+                        <el-main>
+                                标签导航
+                                <f-tag-list></f-tag-list>
+
+                                //主容器用router—viwer来渲染主组件
+                                <router-view></router-view>
+
+                        </el-main>
+                
+                </el-container>
+
+        </el-container>
+</template>
+
+<script setup>
+    import FHeader from "./components/FHeader.vue"
+    import FMenu from "./components/FMenu.vue"
+    import FTagList from "./components/FTagList.vue"
+
+</script>
+```
+
+在layout目录下新建compones目录，管理页面的组件都存放到这里
+
+在componets中新建三个组件,FHeader.vue,FMenu.vue,FTagList.vue
+
+在路由配置中导入
+
+```js
+import { createRouter, createWebHashHistory } from 'vue-router'
+
+//配置admin组件路由，admin下的所有组件，添加到children里面
+const routes = [{ 
+        path: '/',
+        name: 'Admin',
+        component: () =>  import(/* webpackChunkName: "Home" */ '../layout/admin.vue'),
+        children: [{
+            path: '/',
+            component: () =>  import(/* webpackChunkName: "Home" */ '../pages/Index.vue'),
+            meta:{
+                title : "后台首页"
+            }
+        }]
+    },
+    { path: '/login',
+        name: 'Login',
+        component: () =>  import(/* webpackChunkName: "Login" */ '../pages/Login.vue'),
+        meta:{
+            title : "用户登录"
+        }
+    },
+    { path: '/:pathMatch(.*)*',
+        name: 'NotFound',
+        component: () =>  import(/* webpackChunkName: "NotFound" */ '../pages/404.vue')
+    },
+]
+
+const router = createRouter({
+    history: createWebHashHistory(),
+    routes, // `routes: routes` 的缩写
+})
+
+export default router
+```
+
+### 2、头部组件开发
+
+头部样式布局
+
+```vue
+<template>
+    <div class="f-header">
+        <!-- logo图标 -->
+        <span class="logo">
+            <el-icon class="mr-2"><Shop /></el-icon>
+            商城后台系统
+        </span>
+
+        <!-- 收缩图标 -->
+        <el-icon class="icon-btn"><Fold /></el-icon>
+         <!-- 刷新图标 -->
+        <el-icon class="icon-btn"><Refresh /></el-icon>
+
+
+        <!-- 右边的图标和下拉菜单放到一个div -->
+        <!--  style="margin-left: auto" -->
+        <div class="ml-auto flex items-center">
+
+            <!-- 全屏图标 -->
+            <el-icon class="icon-btn"><FullScreen /></el-icon>
+
+            <!-- 下拉菜单 -->
+            <el-dropdown class="dropdown">
+
+                    <!-- 下拉菜单的头像 -->
+                    <span class="flex items-center text-light-50">
+                            <!-- 下拉菜单的头像 -->
+                            <el-avatar class="mr-2" :size="25" :src="$store.state.user.avatar" />
+                            <!-- 下拉菜单头像右边的用户名 -->
+                            {{ $store.state.user.username }}
+                            <el-icon class="el-icon--right">
+                                    <arrow-down />
+                            </el-icon>
+                    </span>
+
+                    <!-- 下拉菜单 -->
+                    <template #dropdown>
+                            <el-dropdown-menu>
+                                <el-dropdown-item>修改密码</el-dropdown-item>
+                                <el-dropdown-item>退出登录</el-dropdown-item>
+                            </el-dropdown-menu>
+                    </template>
+                </el-dropdown>
+        </div>
+
+    </div>
+</template>
+
+<script setup>
+
+</script>
+
+<style scoped>
+    .f-header{
+        @apply flex items-center bg-indigo-700 text-light-50 fixed top-0 left-0 right-0;
+        height: 64px;
+    }
+
+    .logo{
+        width: 250px;
+        @apply flex justify-center items-center text-3xl font-extralight;
+    }
+
+    .icon-btn{
+        @apply flex justify-center items-center;
+        width: 42px;
+        height: 64px;
+        cursor: pointer;
+    }
+
+    .icon-btn:hover{
+        @apply bg-indigo-600;
+    }
+
+    .f-header .dropdown{
+            height: 64px;
+            cursor: pointer;
+            @apply flex justify-center items-center mx-5;
+    }
+
+    .el-icon svg{
+        height: 2em;
+        width: 2em;
+    }
+</style>
+```
+
+### 3、头部组件开发2
+
+将退出登录按钮放到下拉菜单中，删除index.vue的退出登录相关代码
+
+鼠标移动时显示提示
+
+添加刷新，全屏切换
+
+```bash
+#安装vueuse
+npm i @vueuse/core
+```
+
+```vue
+<template>
+    <div class="f-header">
+        <!-- logo图标 -->
+        <span class="logo">
+            <el-icon class="mr-2"><Shop /></el-icon>
+            商城后台系统
+        </span>
+
+        <el-icon class="icon-btn"><Fold /></el-icon>
+
+         <!-- 添加鼠标移动过提示刷新 -->
+          <el-tooltip effect="dark" content="刷新" placement="bottom">
+                <!-- 添加一个事件监听,点击后刷新页面， -->
+                <el-icon class="icon-btn" @click="handleRefresh"><Refresh /></el-icon>
+          </el-tooltip>
+
+        <!-- 右边的图标和下拉菜单放到一个div -->
+        <div class="ml-auto flex items-center">
+
+            <!-- 添加鼠标移动过提示 -->
+            <el-tooltip effect="dark" content="全屏切换" placement="bottom">
+                    <el-icon class="icon-btn" @click="toggle">
+                        <FullScreen v-if="!isFullscreen" />
+                        <el-icon v-else><Aim /></el-icon>
+                    </el-icon>
+            </el-tooltip>
+
+            <!-- 下拉菜单，添加command事件 -->
+            <el-dropdown class="dropdown" @command="handleCommand">
+
+                    <span class="flex items-center text-light-50">
+
+                            <el-avatar class="mr-2" :size="25" :src="$store.state.user.avatar" />
+
+                            {{ $store.state.user.username }}
+                            <el-icon class="el-icon--right">
+                                    <arrow-down />
+                            </el-icon>
+                    </span>
+
+                    <!-- 下拉菜单 -->
+                    <template #dropdown>
+                            <el-dropdown-menu>
+                                <!-- 添加command属性，绑定下面的handleCommand -->
+                                <el-dropdown-item command="rePassword">修改密码</el-dropdown-item>
+                                <el-dropdown-item command="logoutAccount">退出登录</el-dropdown-item>
+                            </el-dropdown-menu>
+                    </template>
+                </el-dropdown>
+        </div>
+
+    </div>
+</template>
+
+<script setup>
+import {logoutFunction, SuccessMsg} from "~/composable/utils.js";
+import router from "~/router/index.js";
+import { logoutApi } from "~/api/manager.js";
+import {useStore} from 'vuex'
+
+//导入vueuse的方法来实现全屏
+import { useFullscreen } from '@vueuse/core'
+const { isFullscreen,toggle } = useFullscreen()
+
+//调用原生的js代码刷新页面
+const handleRefresh = () => location.reload()
+
+//处理handleCommand事件
+const handleCommand = (c) => {
+    switch (c){
+        case "logoutAccount":
+                logout();
+                break;
+        case "rePassword":
+                console.log("修改密码");
+                break
+    }
+}
+
+const store = useStore()
+
+//退出登录功能
+function logout(){
+    logoutFunction("是否要退出登录",).then( () => {
+      logoutApi().finally(() => {
+
+        store.dispatch("logoutAction")
+
+        //跳转回登录页面
+        router.push("/login")
+        //提示退出成功
+        SuccessMsg("已退出！准备去撸串～")
+      })
+      console.log("退出成功")
+    })
+}
+</script>
+
+<style scoped>
+    .f-header{
+        @apply flex items-center bg-indigo-700 text-light-50 fixed top-0 left-0 right-0;
+        height: 64px;
+    }
+
+    .logo{
+        width: 250px;
+        @apply flex justify-center items-center text-3xl font-extralight;
+    }
+
+    .icon-btn{
+        @apply flex justify-center items-center;
+        width: 42px;
+        height: 64px;
+        cursor: pointer;
+    }
+
+    .icon-btn:hover{
+        @apply bg-indigo-600;
+    }
+
+    .f-header .dropdown{
+            height: 64px;
+            cursor: pointer;
+            @apply flex justify-center items-center mx-5;
+    }
+
+    .el-icon svg{
+        height: 2em;
+        width: 2em;
+    }
+</style>
+```
+
+### 4、头部组件开发3
+
+修改密码功能
+
+1、在api的manager.js中添加修改密码api
+
+```js
+//修改密码api
+export function updatePassword(data){
+    return axios.post("/admin/updatepassword",data)
+}
+```
+
+2、添加抽屉组件
+
+```vue
+<template>
+    <div class="f-header">
+        <!-- 左边的logo和图标 -->
+        
+        <!-- 右边的图标和下拉菜单-->
+        <div class="ml-auto flex items-center">
+        </div>
+    </div>
+
+    <!-- 添加一个修改密码的表单 -->
+    <el-drawer v-model="showDrawer" title="修改密码" :close-on-click-modal="false" size="40%">
+            <!-- 添加一个form表单 -->
+            <el-form ref= formRef :model="form"  :rules="rules" label-width="80px">
+
+                    <el-form-item prop="oldpassword" label="旧密码">
+                        <!--username和password和下面style标签中对应-->
+                            <el-input v-model="form.oldpassword" placeholder="请输入旧密码"/>
+                    </el-form-item>
+
+                    <el-form-item prop="password" label="新密码">
+                            <el-input  type="password" show-password v-model="form.password" placeholder="新密码"/>
+                    </el-form-item>
+
+                    <el-form-item prop="repassword" label="确认密码">
+                            <el-input  type="password" show-password v-model="form.repassword" placeholder="确认新密码"/>
+                    </el-form-item>
+
+                    <el-form-item>
+                    <el-button type="primary" @click="onSubmit"  :loading="loading">提交</el-button>
+                    </el-form-item>
+
+      </el-form>
+    </el-drawer>
+
+</template>
+
+<script setup>
+//加入修改密码的js代码
+import { ref,reactive } from 'vue'
+
+//处理handleCommand事件
+const handleCommand = (c) => {
+    switch (c){
+        case "logoutAccount":
+                logout();
+                break;
+        case "rePassword":
+                console.log("修改密码");
+                showDrawer.value = true;
+                break
+    }
+}
+
+//修改密码部分
+const showDrawer = ref(false)
+const form = reactive({
+  oldpassword: "",
+  password: "",
+  repassword: ""
+})
+
+const rules = {
+  oldpassword:[
+      { 
+        required: true,
+        message: '旧密码不能为空', 
+        trigger: 'blur'
+       },
+  ],
+  password:[
+          { 
+        required: true,
+        message: '新密码不能为空', 
+        trigger: 'blur'
+       },
+  ],
+  repassword:[
+          { 
+        required: true,
+        message: '确认新密码不能为空', 
+        trigger: 'blur'
+       },
+  ]
+}
+
+const formRef = ref(null)
+const loading = ref(false)
+
+const onSubmit = () => {
+  //先进行参数验证，参数不能为空
+  formRef.value.validate((valid) => {
+    if(!valid){
+      return false
+    }
+    loading.value = true;
+    updatePassword(form)
+    .then(res => {
+        SuccessMsg("修改密码成功,请重新登录!s")
+        store.dispatch("logoutAction")
+
+        //跳转回登录页面
+        router.push("/login")
+    })
+    .finally(() => {
+      loading.value = false
+    })
+  })
+}
+</script>
+```
+
+修改相应拦截器，增加一个判断，如果发现token失效，强制退出登录，并且刷新页面
+
+```js
+// 添加响应拦截器
+service.interceptors.response.use(function (response) {
+    // 对响应数据做点什么
+    return response.data.data;
+}, function (error) {
+    // 对响应错误做点什么
+
+    const msg = error.response.data.msg || "请求失败"
+
+    if(msg == "非法token，请先登录！"){
+            store.dispatch("logoutAction").finally(() => location.reload())
+    }
+
+    loginFailMsg(error)
+    
+    return Promise.reject(error);
+});
+```
+
 
 
