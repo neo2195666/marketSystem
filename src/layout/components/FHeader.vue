@@ -122,7 +122,7 @@ const handleCommand = (c) => {
 
 .logo {
   width: 250px;
-  @apply flex justify-center items-center text-3xl font-extralight;
+  @apply flex justify-center items-center text-2xl font-extralight;
 }
 
 .icon-btn {
