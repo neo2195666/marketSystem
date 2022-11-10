@@ -6,9 +6,10 @@
             商城后台系统
         </span>
 
-    <!-- 收缩图标 -->
-    <el-icon class="icon-btn">
-      <Fold/>
+    <!-- 收缩图标添加监听事件 -->
+    <el-icon class="icon-btn" @click="$store.commit('handleAsideWidth')">
+      <Fold v-if="$store.state.asideWidth == '250px'"/>
+      <Expand v-else />
     </el-icon>
 
     <!-- 刷新图标 -->
@@ -43,7 +44,7 @@
                             <!-- 下拉菜单的头像 -->
                             <el-avatar class="mr-2" :size="25" :src="$store.state.user.avatar"/>
 
-          <!-- 下拉菜单头像右边的用户名 -->
+                            <!-- 下拉菜单头像右边的用户名 -->
                             {{ $store.state.user.username }}
                             <el-icon class="el-icon--right">
                                     <arrow-down/>

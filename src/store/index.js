@@ -5,13 +5,30 @@ import { setToken,removeToken } from "~/composable/auth.js";
 const store = createStore({
     state () {
         return {
-            user:{}
+            user:{},
+
+            //侧边宽度
+            asideWidth: "250px",
+
+            menus: [],
+            ruleNames:[]
         }
     },
     mutations: {
         SET_USERINFO(state,user){
             state.user = user
+        },
+        handleAsideWidth(state){
+            state.asideWidth = state.asideWidth == "250px" ? "64px" : "250px"
+        },
+        //获取后端数据，忖道state中
+        SET_MENUS(state,menus){
+            state.menus = menus
+        },
+        SET_RULENAMES(state,ruleNames){
+            state.ruleNames = ruleNames
         }
+
     },
     actions: {
         //登录功能
@@ -31,8 +48,11 @@ const store = createStore({
         getInfo({commit}){
             return new Promise((resolve,reject) => {
                 getInfo().then(res => {
-                    //调用SET_USERINFO函数，将信息赋值给state中的user
+                    //获取后端数据，存到state中
                     commit("SET_USERINFO",res)
+                    commit("SET_MENUS",res.menus)
+                    commit("SET_RULENAMES",res.ruleNames)
+                    console.log(res);
                     resolve(res)
                 }).catch(err => reject(err))
             })

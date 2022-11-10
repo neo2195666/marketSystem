@@ -3,7 +3,7 @@ import * as ElementPlusIconsVue from '@element-plus/icons-vue'
 import ElementPlus from 'element-plus'
 import 'element-plus/dist/index.css'
 import "./permission.js"
-import router from './router'
+import { router } from './router'
 import 'virtual:windi.css'
 import App from './App.vue'
 import store from "~/store/index.js";

@@ -9,17 +9,18 @@
                 <!-- 侧边栏和主题放到一个容器内 -->
 
                 <el-container>
-                        <el-aside>
+                        <!-- 设置主容器的侧边栏容器距离为动态的，右边容器将会动态的像左边闭合移动 -->
+                        <el-aside :width="$store.state.asideWidth">
                             <!-- 侧边栏 -->
                             <f-menu></f-menu>
                         </el-aside>  
 
-                        //主容器分标签导航栏
+                        <!-- 主容器分标签导航栏 -->
                         <el-main>
-                                标签导航
+                                <!-- 标签导航 -->
                                 <f-tag-list></f-tag-list>
 
-                                //主容器用router—viwer来渲染主组件
+                                <!-- 主容器用router—viwer来渲染主组件 -->
                                 <router-view></router-view>
 
                         </el-main>
@@ -35,3 +36,11 @@
     import FTagList from "./components/FTagList.vue"
 
 </script>
+
+<style scoped>
+        /* 收缩时设置动画 */
+        .el-aside{
+                transition: all 0.2s;
+        }
+        
+</style>

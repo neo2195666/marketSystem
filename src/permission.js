@@ -1,4 +1,4 @@
-import router from "./router"
+import { addRoutes, router } from './router'
 import { getToken } from "~/composable/auth.js";
 import { loginFirst,showFullLoading,hideFullLoading } from "~/composable/utils.js";
 import store from "~/store/index.js";
@@ -22,17 +22,21 @@ router.beforeEach(async (to, from,next) => {
         return next({path: from.path ? from.path : "/login"})
     }
 
+
+    let hasNewRoutes = false
+
     //如果已经登录，获取并且保存用户信息到store中
     if(token){
         //在store中action存储的函数，在这里要使用dispatch来调度。这里使用await的时候，在钩子函数的参数中要添加async
-        await store.dispatch("getInfo")
+        let { menus } = await store.dispatch("getInfo")
+        hasNewRoutes = addRoutes(menus)
     }
 
     //设置页面标题
     let title = to.meta.title ? to.meta.title : ""
     document.title = title
 
-    next()
+    hasNewRoutes ? next(to.fullPath) : next()
 })
 
 //全局后置钩子结束进度条
