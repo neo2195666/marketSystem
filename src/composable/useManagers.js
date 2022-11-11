@@ -92,7 +92,6 @@ export function useLogout(){
                 //提示退出成功
                 SuccessMsg("已退出！准备去撸串～")
             })
-            console.log("退出成功")
         })
     }
     return{

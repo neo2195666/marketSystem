@@ -4,7 +4,7 @@
     <span class="logo">
             <el-icon class="mr-2"><Shop/></el-icon>
             商城后台系统
-        </span>
+    </span>
 
     <!-- 收缩图标添加监听事件 -->
     <el-icon class="icon-btn" @click="$store.commit('handleAsideWidth')">

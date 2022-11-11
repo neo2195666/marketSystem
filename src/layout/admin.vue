@@ -21,7 +21,9 @@
                                 <f-tag-list></f-tag-list>
 
                                 <!-- 主容器用router—viwer来渲染主组件 -->
-                                <router-view></router-view>
+                                <router-view>
+
+                                </router-view>
 
                         </el-main>
                 

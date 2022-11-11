@@ -5,6 +5,7 @@ import store from "~/store/index.js";
 
 
 //配置全局前置守卫
+let hasGetInfo = false
 router.beforeEach(async (to, from,next) => {
     //显示loading进度条
     showFullLoading()
@@ -26,7 +27,10 @@ router.beforeEach(async (to, from,next) => {
     let hasNewRoutes = false
 
     //如果已经登录，获取并且保存用户信息到store中
-    if(token){
+    if(token && !hasGetInfo){
+        //第一次加载后，把hasGetInfo设置成true，下次再加载的时候，不会重复添加路由
+        hasGetInfo = true
+
         //在store中action存储的函数，在这里要使用dispatch来调度。这里使用await的时候，在钩子函数的参数中要添加async
         let { menus } = await store.dispatch("getInfo")
         hasNewRoutes = addRoutes(menus)

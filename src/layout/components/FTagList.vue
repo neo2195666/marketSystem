@@ -9,7 +9,8 @@
         </el-tabs>
 
         <span class="tag-btn">
-            <el-dropdown>
+            <!-- 添加command事件监听，来绑定clearOther和clearAll -->
+            <el-dropdown @command="handleClose" >
                 <span class="el-dropdown-link">
                     <el-icon>
                         <arrow-down />
@@ -17,11 +18,8 @@
                 </span>
                 <template #dropdown>
                     <el-dropdown-menu>
-                        <el-dropdown-item>Action 1</el-dropdown-item>
-                        <el-dropdown-item>Action 2</el-dropdown-item>
-                        <el-dropdown-item>Action 3</el-dropdown-item>
-                        <el-dropdown-item disabled>Action 4</el-dropdown-item>
-                        <el-dropdown-item divided>Action 5</el-dropdown-item>
+                        <el-dropdown-item command="clearOther">关闭其他标签</el-dropdown-item>
+                        <el-dropdown-item command="clearAll">关闭所有标签</el-dropdown-item>
                     </el-dropdown-menu>
                 </template>
             </el-dropdown>
@@ -35,64 +33,13 @@
 
 
 <script setup>
-import { ref } from 'vue'
 import { ArrowDown } from '@element-plus/icons-vue'
-import {useRoute,onBeforeRouteUpdate} from 'vue-router'
-import { useCookies } from '@vueuse/integrations/useCookies'
-import {router} from "~/router/index.js";
-
-//活动标签的标题对应侧边栏的路由路径
-const route = useRoute()
-const activeTab = ref(route.path)
-
-const tabList = ref([
-  {
-    title: '后台首页',
-    path: '/',
-  },
-])
-
-const cookie = useCookies()
-const addTab =(tab) => {
-    //判断tablist中是否有这个路由，如果没有，就添加新路由到tablist中，等于-1，noThisTab就是true，证明没有，如果返回0，就是false，证明有了。
-    let noThisTab = tabList.value.findIndex(t=>t.path == tab.path) == -1
-    if(noThisTab){
-      tabList.value.push(tab)
-    }
-    //将新的标签添加到cookie防止刷新后标签关闭
-    cookie.set("tabList",tabList.value)
-}
-
-onBeforeRouteUpdate( (to,from) => {
-  //在添加时，直接激活这个标签
-  activeTab.value = to.path
-
-  //在路由更新前，在导航栏添加活动标签
-  addTab({
-    title: to.meta.title,
-    path: to.path
-  })
-})
-
-//活动标签改变时出发的事件
-const changeTab = (t) => {
-    //把这个页面的额活动标签激活
-    activeTab.value = t
-    //路由跳转到这个页面
-    router.push(t)
-}
-
-//为了防止页面刷新后，所有的活动标签会关闭，所以初始化标签导航列表
-const initTabList = () => {
-  //从cookie获取标签导航列表
-  let tbl = cookie.get("tabList")
-  if(tbl) tabList.value = tbl
-}
-initTabList()
-
-const removeTab = (targetName) => {
-
-}
+import { useTabList} from "~/composable/useTabList.js"
+const { activeTab,
+        tabList,
+        changeTab,
+        removeTab,
+        handleClose } = useTabList()
 </script>
 
 
