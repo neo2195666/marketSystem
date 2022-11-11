@@ -3059,89 +3059,44 @@ router.afterEach((to, from) => hideFullLoading())
     <div class="f-tag-list" :style="{left:$store.state.asideWidth}">
 
         <!-- style="min-width: 100px" 设置导航标签过多后开启左右滑动功能 -->
-        <el-tabs v-model="editableTabsValue" type="card" class="demo-tabs" closable @tab-remove="removeTab" style="min-width: 100px">
-            <el-tab-pane v-for="item in editableTabs" :key="item.name" :label="item.title" :name="item.name"> </el-tab-pane>
+        <!-- 把el-tabs的closable去掉，绑定到el-tab-pane中，后面首页活动标签没有关闭按钮-->
+        <!-- tab-change	活动标签改改变时触发的事件-->
+        <el-tabs @tab-change="changeTab" v-model="activeTab" type="card" class="demo-tabs" @tab-remove="removeTab" style="min-width: 100px">
+            <el-tab-pane :closable="item.path != '/'" v-for="item in tabList" :key="item.path" :label="item.title" :name="item.path"> </el-tab-pane>
         </el-tabs>
 
         <span class="tag-btn">
-            <el-dropdown>
+            <!-- 添加command事件监听，来绑定clearOther和clearAll -->
+            <el-dropdown @command="handleClose" >
                 <span class="el-dropdown-link">
-                    <el-icon class="el-icon--right">
+                    <el-icon>
                         <arrow-down />
                     </el-icon>
                 </span>
                 <template #dropdown>
                     <el-dropdown-menu>
-                        <el-dropdown-item>Action 1</el-dropdown-item>
-                        <el-dropdown-item>Action 2</el-dropdown-item>
-                        <el-dropdown-item>Action 3</el-dropdown-item>
-                        <el-dropdown-item disabled>Action 4</el-dropdown-item>
-                        <el-dropdown-item divided>Action 5</el-dropdown-item>
+                        <el-dropdown-item command="clearOther">关闭其他标签</el-dropdown-item>
+                        <el-dropdown-item command="clearAll">关闭所有标签</el-dropdown-item>
                     </el-dropdown-menu>
                 </template>
             </el-dropdown>
         </span>
         
     </div>
+    <div style="height: 44px">
+
+    </div>
 </template>
 
 
 <script setup>
-import { ref } from 'vue'
 import { ArrowDown } from '@element-plus/icons-vue'
-
-let tabIndex = 2
-const editableTabsValue = ref('2')
-const editableTabs = ref([
-  {
-    title: 'Tab 1',
-    name: '1',
-    content: 'Tab 1 content',
-  },
-  {
-    title: 'Tab 2',
-    name: '2',
-    content: 'Tab 2 content',
-  },
-  {
-    title: 'Tab 3',
-    name: '3',
-    content: 'Tab 3 content',
-  },
-  {
-    title: 'Tab 4',
-    name: '4',
-    content: 'Tab 4 content',
-  }
-])
-
-const addTab = (targetName) => {
-  const newTabName = `${++tabIndex}`
-  editableTabs.value.push({
-    title: 'New Tab',
-    name: newTabName,
-    content: 'New Tab content',
-  })
-  editableTabsValue.value = newTabName
-}
-
-const removeTab = (targetName) => {
-  const tabs = editableTabs.value
-  let activeName = editableTabsValue.value
-  if (activeName === targetName) {
-    tabs.forEach((tab, index) => {
-      if (tab.name === targetName) {
-        const nextTab = tabs[index + 1] || tabs[index - 1]
-        if (nextTab) {
-          activeName = nextTab.name
-        }
-      }
-    })
-  }
-
-  editableTabsValue.value = activeName
-  editableTabs.value = tabs.filter((tab) => tab.name !== targetName)
-}
+import { useTabList} from "~/composable/useTabList.js"
+const { activeTab,
+        tabList,
+        changeTab,
+        removeTab,
+        handleClose } = useTabList()
 </script>
 
 
@@ -3183,9 +3138,206 @@ const removeTab = (targetName) => {
 </style>
 ```
 
+将导航标签的处理函数封装成一个js文件。useTabList.js
+
+```js
+import { ref } from 'vue'
+import {useRoute,onBeforeRouteUpdate} from 'vue-router'
+import { useCookies } from '@vueuse/integrations/useCookies'
+import {router} from "~/router/index.js";
+
+export function useTabList(){
+    //活动标签的标题对应侧边栏的路由路径
+    const route = useRoute()
+    const activeTab = ref(route.path)
+
+    const tabList = ref([
+        {
+            title: '后台首页',
+            path: '/',
+        },
+    ])
+
+    const cookie = useCookies()
+    const addTab =(tab) => {
+        //判断tablist中是否有这个路由，如果没有，就添加新路由到tablist中，等于-1，noThisTab就是true，证明没有，如果返回0，就是false，证明有了。
+        let noThisTab = tabList.value.findIndex(t=>t.path == tab.path) == -1
+        if(noThisTab){
+        tabList.value.push(tab)
+        }
+        //将新的标签添加到cookie防止刷新后标签关闭
+        cookie.set("tabList",tabList.value)
+    }
+
+    onBeforeRouteUpdate( (to,from) => {
+    //在添加时，直接激活这个标签
+    activeTab.value = to.path
+
+    //在路由更新前，在导航栏添加活动标签
+    addTab({
+            title: to.meta.title,
+            path: to.path
+        })
+    })
+
+    //活动标签改变时出发的事件
+    const changeTab = (t) => {
+        //把这个页面的额活动标签激活
+        activeTab.value = t
+        //路由跳转到这个页面
+        router.push(t)
+    }
+
+    //为了防止页面刷新后，所有的活动标签会关闭，所以初始化标签导航列表
+    const initTabList = () => {
+        //从cookie获取标签导航列表
+        let tbl = cookie.get("tabList")
+        if(tbl) tabList.value = tbl
+    }
+    initTabList()
+
+    const removeTab = (t) => {
+        //6、removeTab 执行完毕后，触发changeTab事件
+
+        let tabs = tabList.value
+        let a = activeTab
+        //1、如果当前活动页标签等于要关闭的标签
+        if(a == t){
+            tabs.forEach((tab,index) => {
+                //2、如果要关闭的t标签和tab.path标签的path一样，那么获取这个要关闭标签的上一个或者下一个标签
+                if(tab.path == t){
+                        const nextTabl = tabs[index + 1] || tabs[index-1]
+
+                        //3、拿到标签后，把它赋值给当前激活的标签
+                        if(nextTabl){
+                        activeTab.value = nextTabl.path
+                        }
+                }
+            });
+        }
+        //4、将tabList中存在的活动页标签去掉
+        tabList.value = tabList.value.filter( tab => tab.path != t)
+
+        //5、存储新的tabList到cookie中
+        cookie.set("tabList",tabList.value)
+    }
+
+    const handleClose = (c) => {
+        if(c == "clearAll"){
+            //1、把激活的活动标签切换到默认首页
+            activeTab.value = "/"
+            //2、过滤只剩下首页
+            tabList.value = tabList.value.filter(tab => tab.path == "/")
+        }else if(c == "clearOther"){
+            tabList.value = tabList.value.filter(tab => tab.path == "/" || tab.path == activeTab.value)
+        }
+        cookie.set("tabList",tabList.value)
+    }
+
+    return {
+        activeTab,
+        tabList,
+        changeTab,
+        removeTab,
+        handleClose
+    }
+}
+```
+
+router路由配置文件
+
+```js
+import { createRouter, createWebHashHistory } from 'vue-router'
+// 定义一些路由
+// 每个路由都需要映射到一个组件。
+// 我们后面再讨论嵌套路由。
+
+const routes = [
+    { 
+        path: '/',
+        name: 'admin',
+        component: () =>  import(/* webpackChunkName: "Home" */ '../layout/admin.vue'),
+    },
+    { 
+        path: '/login',
+        name: 'Login',
+        component: () =>  import(/* webpackChunkName: "Login" */ '../pages/Login.vue'),
+        meta:{
+            title : "用户登录"
+        }
+    },
+    { 
+        path: '/:pathMatch(.*)*',
+        name: 'NotFound',
+        component: () =>  import(/* webpackChunkName: "NotFound" */ '../pages/404.vue')
+    },
+]
+
+//定义动态路由，用于匹配菜单，动态添加路由
+const asyncRoutes = [
+    {
+        path: '/',
+        name: '/',
+        component: () =>  import(/* webpackChunkName: "Home" */ '../pages/Index.vue'),
+        meta:{
+            title : "后台首页"
+        }
+    },{ 
+        path: '/goods/list',
+        name: '/goods/list',
+        component: () =>  import(/* webpackChunkName: "NotFound" */ '../pages/goods/list.vue'),
+        meta:{
+            title : "商品管理",
+        }
+    },
+    { 
+        path: '/category/list',
+        name: '/category/list',
+        component: () =>  import(/* webpackChunkName: "分类列表" */ '../pages/category/list.vue'),
+        meta:{
+            title : "分类列表",
+        }
+    },
+]
+
+// 创建路由实例并传递 `routes` 配置
+// 你可以在这里输入更多的配置，但我们在这里
+// 暂时保持简单
+export const router = createRouter({
+    // 内部提供了 history 模式的实现。为了简单起见，我们在这里使用 hash 模式。
+    history: createWebHashHistory(),
+    routes, // `routes: routes` 的缩写
+})
 
 
+//定义动态添加路由的方法
+export function addRoutes(menus){
+    //是否有新路由
+    let hasNewRoute = false
+    
+    const findAndAddRouteByMenus = (arr) => {
+        arr.forEach(e => {
+            e.frontpath
+            let item = asyncRoutes.find(o => o.path == e.frontpath )
+            //如果递归查询到的路由是true，并且之前的路由列表里面没有它，那么把这个路由添加到routes去
+            if(item && !router.hasRoute(item.path)) { 
+                router.addRoute("admin",item)
+                hasNewRoute = true
+            }
+             //如果拥有child，并且child的长度 > 0，那么在此调用自身，来添加到routes路由中
+            if(e.child && e.child.length > 0) findAndAddRouteByMenus(e.child)
+        })
+    }
 
+    findAndAddRouteByMenus(menus)
+    return hasNewRoute
+
+}
+```
+
+## 四、后台主控台开发和交互
+
+### 1、
 
 
 
