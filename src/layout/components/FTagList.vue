@@ -45,7 +45,7 @@ const { activeTab,
 
 <style scoped>
     .f-tag-list{
-        @apply fixed bg-gray-200 flex items-center px-2;
+        @apply fixed bg-gray-100 flex items-center px-2;
         top: 64px;
         right: 0px;
         height: 44px;

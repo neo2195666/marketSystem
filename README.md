@@ -3130,7 +3130,7 @@ const { activeTab,
         @apply bg-white mx-1 rounded-2xl;
     }
 
-    /*导航栏华东区到头后变成禁止符号*/
+    /*导航栏滑动到头后变成禁止符号*/
     :deep(.is-disabled){
         cursor: not-allowed;
         @apply text-gray-300;
@@ -3337,7 +3337,9 @@ export function addRoutes(menus){
 
 ## 四、后台主控台开发和交互
 
-### 1、
+### 1、统计组件面板开发
+
+
 
 
 
