@@ -1,14 +1,17 @@
 <template>
     <div class="f-tag-list" :style="{left:$store.state.asideWidth}">
-        
-        <el-tabs v-model="editableTabsValue" type="card" class="demo-tabs" closable @tab-remove="removeTab">
-            <el-tab-pane v-for="item in editableTabs" :key="item.name" :label="item.title" :name="item.name"> </el-tab-pane>
+
+        <!-- style="min-width: 100px" 设置导航标签过多后开启左右滑动功能 -->
+        <!-- 把el-tabs的closable去掉，绑定到el-tab-pane中，后面首页活动标签没有关闭按钮-->
+        <!-- tab-change	活动标签改改变时触发的事件-->
+        <el-tabs @tab-change="changeTab" v-model="activeTab" type="card" class="demo-tabs" @tab-remove="removeTab" style="min-width: 100px">
+            <el-tab-pane :closable="item.path != '/'" v-for="item in tabList" :key="item.path" :label="item.title" :name="item.path"> </el-tab-pane>
         </el-tabs>
 
         <span class="tag-btn">
             <el-dropdown>
                 <span class="el-dropdown-link">
-                    <el-icon class="el-icon--right">
+                    <el-icon>
                         <arrow-down />
                     </el-icon>
                 </span>
@@ -25,54 +28,70 @@
         </span>
         
     </div>
+    <div style="height: 44px">
+
+    </div>
 </template>
 
 
 <script setup>
 import { ref } from 'vue'
 import { ArrowDown } from '@element-plus/icons-vue'
+import {useRoute,onBeforeRouteUpdate} from 'vue-router'
+import { useCookies } from '@vueuse/integrations/useCookies'
+import {router} from "~/router/index.js";
 
-let tabIndex = 2
-const editableTabsValue = ref('2')
-const editableTabs = ref([
+//活动标签的标题对应侧边栏的路由路径
+const route = useRoute()
+const activeTab = ref(route.path)
+
+const tabList = ref([
   {
-    title: 'Tab 1',
-    name: '1',
-    content: 'Tab 1 content',
-  },
-  {
-    title: 'Tab 2',
-    name: '2',
-    content: 'Tab 2 content',
+    title: '后台首页',
+    path: '/',
   },
 ])
 
-const addTab = (targetName) => {
-  const newTabName = `${++tabIndex}`
-  editableTabs.value.push({
-    title: 'New Tab',
-    name: newTabName,
-    content: 'New Tab content',
-  })
-  editableTabsValue.value = newTabName
+const cookie = useCookies()
+const addTab =(tab) => {
+    //判断tablist中是否有这个路由，如果没有，就添加新路由到tablist中，等于-1，noThisTab就是true，证明没有，如果返回0，就是false，证明有了。
+    let noThisTab = tabList.value.findIndex(t=>t.path == tab.path) == -1
+    if(noThisTab){
+      tabList.value.push(tab)
+    }
+    //将新的标签添加到cookie防止刷新后标签关闭
+    cookie.set("tabList",tabList.value)
 }
 
-const removeTab = (targetName) => {
-  const tabs = editableTabs.value
-  let activeName = editableTabsValue.value
-  if (activeName === targetName) {
-    tabs.forEach((tab, index) => {
-      if (tab.name === targetName) {
-        const nextTab = tabs[index + 1] || tabs[index - 1]
-        if (nextTab) {
-          activeName = nextTab.name
-        }
-      }
-    })
-  }
+onBeforeRouteUpdate( (to,from) => {
+  //在添加时，直接激活这个标签
+  activeTab.value = to.path
 
-  editableTabsValue.value = activeName
-  editableTabs.value = tabs.filter((tab) => tab.name !== targetName)
+  //在路由更新前，在导航栏添加活动标签
+  addTab({
+    title: to.meta.title,
+    path: to.path
+  })
+})
+
+//活动标签改变时出发的事件
+const changeTab = (t) => {
+    //把这个页面的额活动标签激活
+    activeTab.value = t
+    //路由跳转到这个页面
+    router.push(t)
+}
+
+//为了防止页面刷新后，所有的活动标签会关闭，所以初始化标签导航列表
+const initTabList = () => {
+  //从cookie获取标签导航列表
+  let tbl = cookie.get("tabList")
+  if(tbl) tabList.value = tbl
+}
+initTabList()
+
+const removeTab = (targetName) => {
+
 }
 </script>
 
@@ -103,7 +122,13 @@ const removeTab = (targetName) => {
         border: 0!important;
         height: 32px;
         line-height: 32px;
+        margin-top: 4px;
         @apply bg-white mx-1 rounded-2xl;
     }
 
+    /*导航栏华东区到头后变成禁止符号*/
+    :deep(.is-disabled){
+        cursor: not-allowed;
+        @apply text-gray-300;
+    }
 </style>

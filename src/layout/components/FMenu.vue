@@ -56,7 +56,6 @@ const isCollapse = computed( () => !(store.state.asideWidth == '250px'))
 
     const handleSelect = (e) => {
         router.push(e)
-        console.log(e);
     }
 </script>
 

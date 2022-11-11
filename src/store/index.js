@@ -37,7 +37,6 @@ const store = createStore({
                 login(username,password).then( res => {
                     //存储cookie
                     setToken(res.token)
-                    console.log("打印token:" + res.token)
                     resolve(res)
 
                 }).catch(err => reject(err))
@@ -52,7 +51,6 @@ const store = createStore({
                     commit("SET_USERINFO",res)
                     commit("SET_MENUS",res.menus)
                     commit("SET_RULENAMES",res.ruleNames)
-                    console.log(res);
                     resolve(res)
                 }).catch(err => reject(err))
             })
