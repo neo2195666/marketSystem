@@ -3582,6 +3582,555 @@ watch( () => props.value,() => AnimateToValue())
 
 ### 2、分类组件开发和跳转
 
+在根目录下的component目录下新建indexNavs.vue组件。
+
+```vue
+<template>
+    <!-- 使用layout布局 -->
+    <el-row :gutter="3" class="mt-10">
+        <el-col :span="3" :offset="0" v-for="(item,index) in iconNavs" :key="index">
+        
+        <!-- 使用卡片布局 -->
+        <el-card shadow="hover" @click="$router.push(item.path)">
+            <div class="flex flex-col items-center justify-center cursor-pointer">
+                <el-icon :class="item.color" :size="45" >
+                    <component :is="item.icon"/>
+                </el-icon>
+                <span class="text-2xl">分类</span>
+            </div>
+        </el-card>
+
+        </el-col> 
+    </el-row>
+</template>
+    
+<script setup>
+
+const iconNavs = [
+    {
+        icon: "user",
+        color: "text-light-blue-500",
+        title: "用户",
+        path: "/user/list"
+    },
+    {
+        icon: "shopping-cart",
+        color: "text-violet-500",
+        title: "商品",
+        path: "/goods/list"
+    },
+    {
+        icon: "tickets",
+        color: "text-fuchsia-500",
+        title: "订单",
+        path: "/order/list"
+    },
+    {
+        icon: "user",
+        color: "text-light-blue-500",
+        title: "评价",
+        path: "/comment/list"
+    },
+    {
+        icon: "picture",
+        color: "text-rose-500",
+        title: "图库",
+        path: "/image/list"
+    },
+    {
+        icon: "bell",
+        color: "text-light-blue-500",
+        title: "公告",
+        path: "/notice/list"
+    },
+    {
+        icon: "set-up",
+        color: "text-grey-500",
+        title: "配置",
+        path: "/setting/base"
+    },
+    {
+        icon: "files",
+        color: "text-yellow-500",
+        title: "优惠券",
+        path: "/coupon/list"
+    }
+]
+
+</script>
+```
+
+在pages目录下，创建user,coupon,order,comment,notice,image目录，每个目录创建一个list组件。创建setting目录，在里面创建base组件。
+
+然后配置路由，
+
+```js
+import { createRouter, createWebHashHistory } from 'vue-router'
+// 定义一些路由
+// 每个路由都需要映射到一个组件。
+// 我们后面再讨论嵌套路由。
+
+const routes = [
+    { 
+        path: '/',
+        name: 'admin',
+        component: () =>  import(/* webpackChunkName: "Home" */ '../layout/admin.vue'),
+    },
+    { 
+        path: '/login',
+        name: 'Login',
+        component: () =>  import(/* webpackChunkName: "Login" */ '../pages/Login.vue'),
+        meta:{
+            title : "用户登录"
+        }
+    },
+    { 
+        path: '/:pathMatch(.*)*',
+        name: 'NotFound',
+        component: () =>  import(/* webpackChunkName: "NotFound" */ '../pages/404.vue')
+    },
+]
+
+//定义动态路由，用于匹配菜单，动态添加路由
+const asyncRoutes = [
+    {
+        path: '/',
+        name: '/',
+        component: () =>  import(/* webpackChunkName: "Home" */ '../pages/Index.vue'),
+        meta:{
+            title : "后台首页"
+        }
+    },{ 
+        path: '/goods/list',
+        name: '/goods/list',
+        component: () =>  import(/* webpackChunkName: "商品管理" */ '../pages/goods/list.vue'),
+        meta:{
+            title : "商品管理",
+        }
+    },
+    { 
+        path: '/category/list',
+        name: '/category/list',
+        component: () =>  import(/* webpackChunkName: "分类列表" */ '../pages/category/list.vue'),
+        meta:{
+            title : "分类列表",
+        }
+    },
+    { 
+        path: '/user/list',
+        name: '/user/list',
+        component: () =>  import(/* webpackChunkName: "用户列表" */ '../pages/user/list.vue'),
+        meta:{
+            title : "用户列表",
+        }
+    },
+    { 
+        path: '/order/list',
+        name: '/order/list',
+        component: () =>  import(/* webpackChunkName: "订单列表" */ '../pages/order/list.vue'),
+        meta:{
+            title : "订单列表",
+        }
+    },
+    { 
+        path: '/image/list',
+        name: '/image/list',
+        component: () =>  import(/* webpackChunkName: "图片列表" */ '../pages/image/list.vue'),
+        meta:{
+            title : "图片列表",
+        }
+    },
+    { 
+        path: '/comment/list',
+        name: '/comment/list',
+        component: () =>  import(/* webpackChunkName: "评价列表" */ '../pages/comment/list.vue'),
+        meta:{
+            title : "评价列表",
+        }
+    },
+    { 
+        path: '/notice/list',
+        name: '/notice/list',
+        component: () =>  import(/* webpackChunkName: "公告列表" */ '../pages/notice/list.vue'),
+        meta:{
+            title : "公告列表",
+        }
+    },
+    { 
+        path: '/coupon/list',
+        name: '/coupon/list',
+        component: () =>  import(/* webpackChunkName: "优惠列表" */ '../pages/coupon/list.vue'),
+        meta:{
+            title : "优惠列表",
+        }
+    },
+    { 
+        path: '/setting/base',
+        name: '/setting/base',
+        component: () =>  import(/* webpackChunkName: "设置列表" */ '../pages/setting/base.vue'),
+        meta:{
+            title : "设置列表",
+        }
+    },
+]
+
+// 创建路由实例并传递 `routes` 配置
+// 你可以在这里输入更多的配置，但我们在这里
+// 暂时保持简单
+export const router = createRouter({
+    // 内部提供了 history 模式的实现。为了简单起见，我们在这里使用 hash 模式。
+    history: createWebHashHistory(),
+    routes, // `routes: routes` 的缩写
+})
+
+
+//定义动态添加路由的方法
+export function addRoutes(menus){
+    //是否有新路由
+    let hasNewRoute = false
+    
+    const findAndAddRouteByMenus = (arr) => {
+        arr.forEach(e => {
+            e.frontpath
+            let item = asyncRoutes.find(o => o.path == e.frontpath )
+            //如果递归查询到的路由是true，并且之前的路由列表里面没有它，那么把这个路由添加到routes去
+            if(item && !router.hasRoute(item.path)) { 
+                router.addRoute("admin",item)
+                hasNewRoute = true
+            }
+             //如果拥有child，并且child的长度 > 0，那么在此调用自身，来添加到routes路由中
+            if(e.child && e.child.length > 0) findAndAddRouteByMenus(e.child)
+        })
+    }
+
+    findAndAddRouteByMenus(menus)
+    return hasNewRoute
+}
+```
+
+### 3、echart图表组件开发和交互
+
+echart图表的样式，可以在apache官网的echart部分寻找
+
+打开echarts官网，找到安装命令
+
+```bash
+npm install echarts
+```
+
+在index.js的api文件中配置api接口，get请求方式
+
+```js
+export function getStatistics3(){
+    return axios.get("/admin/statistics3?type=" + type)
+}
+```
+
+在根目录下的component目录中创建IndexChart组件
+
+```vue
+<template>
+    <el-card shadow="hover">
+        <template #header>
+            <div class="flex justify-between">
+                <span class="text-2xl">订单统计</span>
+                <div>
+                     <el-check-tag @click="handleChoose(item.value)" :checked="current == item.value" style="margin-right: 8px" v-for="(item,index) in options" :key="index">
+                        {{ item.text }}
+                     </el-check-tag>
+                </div>
+            </div>
+        </template>
+
+        <!-- 定义图表 -->
+        <div ref="el" id="chart" style="width:100%; height:300px"></div>
+
+    </el-card>
+</template>
+
+<script setup>
+    import { ref,onMounted,onbeforeMount } from "vue"
+    import * as echarts from 'echarts';
+    import { getStatistics3 } from "~/api/index.js"
+
+    //导入vueuse实现图表的动态变大变小
+    import { useResizeObserver } from '@vueuse/core'
+    //实现图表随着浏览器大小变动，而动态变化大小
+    const el = ref(null)
+    useResizeObserver(el, (entries) => myChart.resize())
+
+    const current = ref("")
+    const options = [{
+            text:"近一个月",
+            value:"month"
+        },
+        {
+            text:"近一周",
+            value:"week"
+        },
+        {
+            text:"近24小时",
+            value:"hour"
+        }]
+
+    const handleChoose = (type) => {
+        current.value = type
+        getData()
+    }  
+
+
+//设置树状图图表
+var myChart = null
+onMounted( () => {
+    var chartDom = document.getElementById('chart');
+    myChart = echarts.init(chartDom);
+
+    getData();
+})
+
+//在关闭网页前销毁图表组件
+onbeforeMount( () => {
+    if(myChart) echarts.dispose();
+})
+
+const getData = () => {
+    let option = {
+        xAxis: {
+            type: 'category',
+            data: []
+        },
+        yAxis: {
+            type: 'value'
+        },
+        series: [
+            {
+                data: [],
+                type: 'bar',
+                showBackground: true,
+                backgroundStyle: {
+                    color: 'rgba(180, 180, 180, 0.2)'
+                }
+            }
+        ]
+    };
+
+    //开启loading动画
+    myChart.showLoading()
+    //从后台获取数据，赋值给chart图表
+    getStatistics3(current.value).then( res => {
+ 
+        option.xAxis.data = res.x
+        option.series[0].data = res.y 
+
+        //渲染图表
+        myChart.setOption(option);  
+    }).finally( () => {
+        myChart.hideLoading()
+    })
+}
+
+</script>
+```
+
+### 4、店铺和交易提示组件开发
+
+在api目录下，index.js添加接口
+
+```js
+export function getStatistics2(){
+    return axios.get("/admin/statistics2")
+}
+```
+
+在根目录下的components组件新建一个IndexCard组件
+
+```vue
+<template>
+   <el-card shadow="never">
+       <template #header>
+            <div class="flex justify-between text-2xl">
+                <!-- 卡片标题 -->
+                <span>{{ title }}</span>
+
+                <el-tag type="danger" effect="dark">
+                         {{ tip }}
+                </el-tag>
+            </div>
+       </template>
+       
+        <el-row :gutter="20">
+            <el-col :span="6" :offset="0" v-for="(item,index) in btns" :key="index">
+                <el-card shadow="hover" class="border-0; bg-light-400">
+                    <div class="flex flex-col items-center justify-center">
+                        <span class="text-2xl">{{ item.value }}</span>
+                        <span class="text-2xl">{{ item.label }}</span> 
+                    </div>
+                </el-card>        
+            </el-col>
+            
+        </el-row>
+        
+   </el-card>
+
+</template>
+
+<script setup>
+
+defineProps({
+    title: String,
+    tip: String,
+    btns:Array
+})
+
+</script>
+```
+
+### 5、修改Index.vue来导入步骤1到4的所有组件
+
+```vue
+<template>
+  <div>
+
+      <!-- 使用layout布局 -->
+      <el-row :gutter="20">
+            <template v-if="panels.length == 0">
+              <el-col :span="6" :offset="0" v-for="i in 4" :key="i">
+
+                <!-- 使用骨架屏 -->
+                <!-- animated 和 loading是加载动画效果 -->
+                <el-skeleton style="width: 100%" animated loading>
+                  <template #template>
+                    <!-- 使用ep 的卡片组件 -->
+                    <el-card shadow="hover" :body-style="{ padding: '20px' }">
+                      <template #header>
+                        <div class="flex justify-between">
+                          <!-- 卡片标题 -->
+                          <el-skeleton-item variant="text" style="width: 50%" />
+
+                          <el-skeleton-item variant="text" style="width: 15%" />
+
+                        </div>
+                      </template>
+
+                      <!-- 卡片的body -->
+                      <el-skeleton-item variant="h3" style="width: 80%" />
+
+                      <!-- 分割线 -->
+                      <el-divider />
+
+                      <div class="flex justify-between">
+                        <el-skeleton-item variant="text" style="width: 50%" />
+                        <el-skeleton-item variant="text" style="width: 15%" />
+                      </div>
+
+                    </el-card>
+                  </template>
+                </el-skeleton>
+              </el-col>
+            </template>
+
+
+            <el-col :span="6" :offset="0" v-for="(item,index) in panels" :key="index" >
+                  <!-- 使用ep 的卡片组件 -->
+                  <el-card shadow="hover" :body-style="{ padding: '20px' }">
+                        <template #header>
+                              <div class="flex justify-between text-2xl">
+                                    <!-- 卡片标题 -->
+                                    <span>{{ item.title }}</span>
+
+                                    <el-tag :type="item.unitColor" effect="dark">
+                                        {{ item.unit }}
+                                    </el-tag>
+                              </div>
+                        </template>
+
+                        <!-- 卡片的body --><!-- 引入滚动动画 -->
+                        <span class="text-5xl font-bold">
+                              <CountTo :value="item.value"/>
+                        </span>
+
+                        <!-- 分割线 -->
+                        <el-divider />
+
+                        <div class="flex justify-between text-2xl">
+                              <span>{{ item.subTitle }}</span>
+                              <span>{{ item.subValue }}</span>
+                        </div>
+
+                  </el-card>
+            </el-col>
+      </el-row>
+
+      <IndexNavs/>
+
+      <!-- 使用layout布局，左右各12 -->
+      <el-row :gutter="20" class="mt-5">
+            <!-- 左边的图表组件 -->
+            <el-col :span="12" :offset="0">
+                  <!-- 调用卡片 -->
+                  <IndexChart"/>
+            </el-col>
+
+            <!-- 右边的卡片组 -->
+            <el-col :span="12" :offset="0">
+                <IndexCard class="mb-3" title="店铺及商品提示" tip="店铺及商品提示" :btns="goods"/>
+                <IndexCard title="交易提示" tip="需要立即处理的交易订单" :btns="order"/>
+            </el-col>
+      </el-row>
+      
+  </div>
+</template>
+
+<script setup>
+    import { ref } from "vue"
+    import { getStatistics1,getStatistics2 } from "~/api/index.js"
+    import CountTo from "~/components/CountTo.vue"
+    import IndexNavs from "~/components/IndexNavs.vue"
+    import IndexChart from "~/components/IndexChart.vue"
+    import IndexCard from "~/components/IndexCard.vue"
+
+    //获取面板信息
+    const panels = ref([])
+    getStatistics1()
+    .then( res => {
+        panels.value = res.panels
+    })
+
+
+    const goods = ref([])
+    const order = ref([])
+    getStatistics2().then( res => {
+        goods.value = res.goods
+        order.value = res.order
+    })
+
+</script>
+```
+
+### 6、v-permission权限
+
+根目录下新建directives的目录，新进一个permission.js
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

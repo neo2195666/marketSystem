@@ -8,8 +8,9 @@ import 'virtual:windi.css'
 import App from './App.vue'
 import store from "~/store/index.js";
 import "../node_modules/nprogress/nprogress.css"
+import permission from './directives/permission.js'
 
-const app = createApp(App).use(ElementPlus).use(router).use(store)
+const app = createApp(App).use(ElementPlus).use(router).use(store).use(permission)
 
 for (const [key, component] of Object.entries(ElementPlusIconsVue)) {
     app.component(key, component)

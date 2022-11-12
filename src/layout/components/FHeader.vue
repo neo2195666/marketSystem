@@ -2,8 +2,8 @@
   <div class="f-header">
     <!-- logo图标 -->
     <span class="logo">
-            <el-icon class="mr-2"><Shop/></el-icon>
-            商城后台系统
+            <el-icon class="mr-2 text-4xl"><Shop/></el-icon>
+            <span class="text-3xl">商城后台系统</span>
     </span>
 
     <!-- 收缩图标添加监听事件 -->
@@ -119,6 +119,7 @@ const handleCommand = (c) => {
 .f-header {
   @apply flex items-center bg-indigo-700 text-light-50 fixed top-0 left-0 right-0;
   height: 64px;
+  z-index: 1000;
 }
 
 .logo {

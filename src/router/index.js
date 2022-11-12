@@ -36,7 +36,7 @@ const asyncRoutes = [
     },{ 
         path: '/goods/list',
         name: '/goods/list',
-        component: () =>  import(/* webpackChunkName: "NotFound" */ '../pages/goods/list.vue'),
+        component: () =>  import(/* webpackChunkName: "商品管理" */ '../pages/goods/list.vue'),
         meta:{
             title : "商品管理",
         }
@@ -47,6 +47,62 @@ const asyncRoutes = [
         component: () =>  import(/* webpackChunkName: "分类列表" */ '../pages/category/list.vue'),
         meta:{
             title : "分类列表",
+        }
+    },
+    { 
+        path: '/user/list',
+        name: '/user/list',
+        component: () =>  import(/* webpackChunkName: "用户列表" */ '../pages/user/list.vue'),
+        meta:{
+            title : "用户列表",
+        }
+    },
+    { 
+        path: '/order/list',
+        name: '/order/list',
+        component: () =>  import(/* webpackChunkName: "订单列表" */ '../pages/order/list.vue'),
+        meta:{
+            title : "订单列表",
+        }
+    },
+    { 
+        path: '/image/list',
+        name: '/image/list',
+        component: () =>  import(/* webpackChunkName: "图片列表" */ '../pages/image/list.vue'),
+        meta:{
+            title : "图片列表",
+        }
+    },
+    { 
+        path: '/comment/list',
+        name: '/comment/list',
+        component: () =>  import(/* webpackChunkName: "评价列表" */ '../pages/comment/list.vue'),
+        meta:{
+            title : "评价列表",
+        }
+    },
+    { 
+        path: '/notice/list',
+        name: '/notice/list',
+        component: () =>  import(/* webpackChunkName: "公告列表" */ '../pages/notice/list.vue'),
+        meta:{
+            title : "公告列表",
+        }
+    },
+    { 
+        path: '/coupon/list',
+        name: '/coupon/list',
+        component: () =>  import(/* webpackChunkName: "优惠列表" */ '../pages/coupon/list.vue'),
+        meta:{
+            title : "优惠列表",
+        }
+    },
+    { 
+        path: '/setting/base',
+        name: '/setting/base',
+        component: () =>  import(/* webpackChunkName: "设置列表" */ '../pages/setting/base.vue'),
+        meta:{
+            title : "设置列表",
         }
     },
 ]

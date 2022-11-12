@@ -4,7 +4,7 @@
         <!-- style="min-width: 100px" 设置导航标签过多后开启左右滑动功能 -->
         <!-- 把el-tabs的closable去掉，绑定到el-tab-pane中，后面首页活动标签没有关闭按钮-->
         <!-- tab-change	活动标签改改变时触发的事件-->
-        <el-tabs @tab-change="changeTab" v-model="activeTab" type="card" class="demo-tabs" @tab-remove="removeTab" style="min-width: 100px">
+        <el-tabs @tab-change="changeTab" v-model="activeTab" type="card" @tab-remove="removeTab" style="min-width: 100px">
             <el-tab-pane :closable="item.path != '/'" v-for="item in tabList" :key="item.path" :label="item.title" :name="item.path"> </el-tab-pane>
         </el-tabs>
 
@@ -63,6 +63,8 @@ const { activeTab,
 
     :deep(.el-tabs__nav){
         border: 0!important;
+        font-bold: 2px;
+       
     }
 
     :deep(.el-tabs__item){
