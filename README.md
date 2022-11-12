@@ -3339,9 +3339,248 @@ export function addRoutes(menus){
 
 ### 1、统计组件面板开发
 
+在api中新建一个index.js的文件，对应index.vue组件。导入axios
+
+```js
+import axios from "~/axios"
+
+export function getStatistics1(){
+    return axios.get("/admin/statistics1")
+}
+```
+
+修改index.vue组件,布局页面，导入卡element plus的卡片组件和骨架屏。组件的工作流程是，当进入后台页面后，panels没有加载出来，panels.length长度是0，此时股价瓶的效果会出来，而下面真正卡片的内容还没有加载出来，所以没有在页面上显示，等页面上panels的数据加载完毕后，骨架屏会隐藏，真正的卡片内容就会加载出来
+
+```vue
+<template>
+  <div>
+
+      <!-- 使用layout布局 -->
+      <el-row :gutter="20">
+            <template v-if="panels.length == 0">
+              <el-col :span="6" :offset="0" v-for="i in 4" :key="i">
+
+                <!-- 使用骨架屏 -->
+                <!-- animated 和 loading是加载动画效果 -->
+                <el-skeleton style="width: 100%" animated loading>
+                  <template #template>
+                    <!-- 使用ep 的卡片组件 -->
+                    <el-card shadow="hover" :body-style="{ padding: '20px' }">
+                      <template #header>
+                        <div class="flex justify-between">
+                          <!-- 卡片标题 -->
+                          <el-skeleton-item variant="text" style="width: 50%" />
+
+                          <el-skeleton-item variant="text" style="width: 15%" />
+
+                        </div>
+                      </template>
+
+                      <!-- 卡片的body -->
+                      <el-skeleton-item variant="h3" style="width: 80%" />
+
+                      <!-- 分割线 -->
+                      <el-divider />
+
+                      <div class="flex justify-between">
+                        <el-skeleton-item variant="text" style="width: 50%" />
+                        <el-skeleton-item variant="text" style="width: 15%" />
+                      </div>
+
+                    </el-card>
+                  </template>
+                </el-skeleton>
+              </el-col>
+            </template>
+
+        
+            <el-col :span="6" :offset="0" v-for="(item,index) in panels" :key="index">
+                  <!-- 使用ep 的卡片组件 -->
+                  <el-card shadow="hover" :body-style="{ padding: '20px' }">
+                        <template #header>
+                              <div class="flex justify-between">
+                                    <!-- 卡片标题 -->
+                                    <span>{{ item.title }}</span>
+
+                                    <el-tag :type="item.unitColor" effect="dark">
+                                        {{ item.unit }}
+                                    </el-tag>
+                              </div>
+                        </template>
+
+                        <!-- 卡片的body -->
+                        <span class="text-3xl font-bold">
+                              {{ item.value }}
+                        </span>
+
+                        <!-- 分割线 -->
+                        <el-divider />
+
+                        <div class="flex justify-between">
+                              <span>{{ item.subTitle }}</span>
+                              <span>{{ item.subValue }}</span>
+                        </div>
+
+                  </el-card>
+              
+            </el-col>
+      </el-row>
+
+  </div>
+</template>
+
+<script setup>
+    import { ref } from "vue"
+    import { getStatistics1 } from "~/api/index.js"
+
+    //获取面板信息
+    const panels = ref([])
+    getStatistics1()
+    .then( res => {
+        console.log(res);
+        panels.value = res.panels
+    })
+
+</script>
+```
+
+给数据添加滚动动画效果，在npm网找到gsap模块，安装到工程中。
+
+```bash
+npm i gsap
+```
+
+在根目录下的components新建一个CountTo.vue组件
+
+```vue
+<template>
+    {{ d.num.toFixed(0)}}
+</template>
+
+<script setup>
+import {reactive, watch} from "vue";
+import gsap from "gsap"
+
+//定义从父组件接受数据
+const props = defineProps({
+    value: {
+        type: Number,
+        default: 0
+    }
+})
+
+//设置动画从哪里开始滚动
+const d = reactive({
+    num:0
+})
+
+//定义滚动的函数
+function AnimateToValue(){
+    gsap.to(d,{
+        duration:0.5,
+        num:props.value
+    })
+}
+//开启监听，发现数据改变就开始滚动
+watch( () => props.value,() => AnimateToValue())
+</script>
+```
+
+调用CountTo组件，将上面的index.vue组件修改成如下，实现卡片内数字的动画效果
+
+```vue
+<template>
+  <div>
+
+      <!-- 使用layout布局 -->
+      <el-row :gutter="20">
+            <template v-if="panels.length == 0">
+              <el-col :span="6" :offset="0" v-for="i in 4" :key="i">
+
+                <!-- 使用骨架屏 -->
+                <!-- animated 和 loading是加载动画效果 -->
+                <el-skeleton style="width: 100%" animated loading>
+                  <template #template>
+                    <!-- 使用ep 的卡片组件 -->
+                    <el-card shadow="hover" :body-style="{ padding: '20px' }">
+                      <template #header>
+                        <div class="flex justify-between">
+                          <!-- 卡片标题 -->
+                          <el-skeleton-item variant="text" style="width: 50%" />
+
+                          <el-skeleton-item variant="text" style="width: 15%" />
+
+                        </div>
+                      </template>
+
+                      <!-- 卡片的body -->
+                      <el-skeleton-item variant="h3" style="width: 80%" />
+
+                      <!-- 分割线 -->
+                      <el-divider />
+
+                      <div class="flex justify-between">
+                        <el-skeleton-item variant="text" style="width: 50%" />
+                        <el-skeleton-item variant="text" style="width: 15%" />
+                      </div>
+
+                    </el-card>
+                  </template>
+                </el-skeleton>
+              </el-col>
+            </template>
 
 
+            <el-col :span="6" :offset="0" v-for="(item,index) in panels" :key="index">
+                  <!-- 使用ep 的卡片组件 -->
+                  <el-card shadow="hover" :body-style="{ padding: '20px' }">
+                        <template #header>
+                              <div class="flex justify-between">
+                                    <!-- 卡片标题 -->
+                                    <span>{{ item.title }}</span>
 
+                                    <el-tag :type="item.unitColor" effect="dark">
+                                        {{ item.unit }}
+                                    </el-tag>
+                              </div>
+                        </template>
+
+                        <!-- 卡片的body --><!-- 引入滚动动画 -->
+                        <span class="text-3xl font-bold">
+                              <CountTo :value="item.value"/>
+                        </span>
+
+                        <!-- 分割线 -->
+                        <el-divider />
+
+                        <div class="flex justify-between">
+                              <span>{{ item.subTitle }}</span>
+                              <span>{{ item.subValue }}</span>
+                        </div>
+
+                  </el-card>
+
+            </el-col>
+      </el-row>
+
+  </div>
+</template>
+
+<script setup>
+    import { ref } from "vue"
+    import { getStatistics1 } from "~/api/index.js"
+    import CountTo from "~/components/CountTo.vue"
+
+    //获取面板信息
+    const panels = ref([])
+    getStatistics1()
+    .then( res => {
+        panels.value = res.panels
+    })
+</script>
+```
+
+### 2、分类组件开发和跳转
 
 
 
