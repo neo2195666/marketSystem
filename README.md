@@ -4111,7 +4111,149 @@ defineProps({
 
 根目录下新建directives的目录，新进一个permission.js
 
+## 五、图库模块开发
 
+### 1、新建两个模块组件
+
+在根目录下的componets中新建三个图片相关模块组件，ImageAside.vue,ImageMain.vue,AsideList.vue
+
+AsideList.vue
+
+```vue
+<template>
+        <div class="aside-list" :class="{'active' : active}">
+                <span class="truncate" ><slot/></span>
+                <el-button text class="ml-auto px-1" type="primary" size="default" @click="$emit('edit')">
+                    <el-icon><Edit :size="12"/></el-icon>
+                </el-button>
+                <el-button text type="primary" class="px-1" size="default" @click="$emit('delete')">
+                    <el-icon><Close :size="12"/></el-icon>
+                </el-button>
+        </div>
+</template>
+
+<script setup>
+defineProps({
+    active:{
+        type: Boolean,
+        default: false
+    }
+})
+
+defineEmits(["edit","delete"])
+
+</script>
+
+<style>
+    .aside-list{
+        border-bottom: 1px solid #f4f4f4;
+        cursor: pointer;
+        @apply flex items-center p-3 text-2xl text-gray-600;
+    }
+
+    .aside-list:hover,.active{
+        @apply bg-blue-100;
+    }
+</style>
+```
+
+ImageAside.vue
+
+```vue
+<template>
+    <el-aside width="220px" class="image-aside">
+            <div class="top">
+                <AsideList>
+                    分类标题
+                </AsideList>
+
+                <AsideList active="true">
+                    分类标题
+                </AsideList>
+
+            </div>
+
+            <!-- 侧边分页 -->
+            <div class="bottom">
+                侧边分页功能
+            </div>
+        </el-aside>
+</template>
+
+<script setup>
+import AsideList from './AsideList.vue'
+
+</script>
+
+<style>
+    .image-aside{
+        border-right: 1px solid #eeeeee;
+        position: relative;
+    }
+
+    .image-aside .top{
+        position: absolute;
+        top: 0;
+        right: 0;
+        left: 0;
+        bottom: 50px;
+        overflow-y: auto;
+    }
+
+    .image-aside .bottom{
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 50px;
+        @apply flex items-center justify-center; 
+    }
+</style>
+```
+
+ImageMain.vue
+
+```vue
+<template>
+    <el-main class="image-main">
+
+            <div class="top">
+                <div v-for="i in 100" :key="i"> {{ i }}</div>
+            </div> 
+
+            <div class="bottom">
+                主体分页功能
+            </div>
+
+        </el-main>
+</template>
+
+
+<style>
+    .image-main{
+        position: relative;
+    }
+
+    .image-main .top{
+        position: absolute;
+        top: 0;
+        right: 0;
+        left: 0;
+        bottom: 50px;
+        overflow-y: auto;
+    }
+
+    .image-main .bottom{
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 50px;
+        @apply flex items-center justify-center; 
+    }
+
+</style>
+```
 
 
 

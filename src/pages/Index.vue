@@ -75,7 +75,7 @@
             <!-- 左边的图表组件 -->
             <el-col :span="12" :offset="0">
                   <!-- 调用卡片 -->
-                  <IndexChart v-permission="['getStatistics31,GET']"/>
+                  <IndexChart v-permission="['getStatistics3,GET']"/>
             </el-col>
 
             <!-- 右边的卡片组 -->
