@@ -63,7 +63,7 @@ const { activeTab,
 
     :deep(.el-tabs__nav){
         border: 0!important;
-        font-bold: 2px;
+        font-bold: 4px;
        
     }
 

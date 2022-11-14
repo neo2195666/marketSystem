@@ -4,9 +4,17 @@
                 <el-button text class="ml-auto px-1" type="primary" size="default" @click="$emit('edit')">
                     <el-icon><Edit :size="12"/></el-icon>
                 </el-button>
-                <el-button text type="primary" class="px-1" size="default" @click="$emit('delete')">
-                    <el-icon><Close :size="12"/></el-icon>
-                </el-button>
+
+                <el-popconfirm title="确认要删除分类吗?" confirm-button-text="是" cancel-button-text="否" confirm-button-type="danger" @confirm="$emit('delete')">
+                  <template #reference>
+                    <el-button>
+                      <el-button text type="primary" class="px-1" size="default">
+                        <el-icon><Close :size="12"/></el-icon>
+                      </el-button>
+                    </el-button>
+                  </template>
+                </el-popconfirm>
+
         </div>
 </template>
 

@@ -3,7 +3,7 @@
     <!-- logo图标 -->
     <span class="logo">
             <el-icon class="mr-2 text-4xl"><Shop/></el-icon>
-            <span class="text-3xl">商城后台系统</span>
+            <span class="text-2xl">商城后台系统</span>
     </span>
 
     <!-- 收缩图标添加监听事件 -->

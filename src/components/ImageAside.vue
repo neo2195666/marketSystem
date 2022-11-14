@@ -1,8 +1,8 @@
 <template>
-    <el-aside width="220px" class="image-aside" v-loading="loading">
+    <el-aside width="320px" class="image-aside" v-loading="loading">
             <!-- 侧边分类列表 -->
             <div class="top">
-                <AsideList @edit="imageHadleEdit(item)" :active="activeId == item.id" v-for="(item,index) in list" :key="index">
+                <AsideList @delete="imageHandleDelete(item.id)" @edit="imageHandleEdit(item)" :active="activeId == item.id" v-for="(item,index) in list" :key="index">
                     {{ item.name }}
                 </AsideList>
 
@@ -15,7 +15,7 @@
         </el-aside>
 
         <!-- 导入抽屉组件来实现新增图库 -->
-        <FormDrawer title="新增" ref="formDrawerRef" @submit="imageHandleSubmit">
+        <FormDrawer :title="drawerTitle" ref="formDrawerRef" @submit="imageHandleSubmit">
             <el-form :model="form" ref="formRef" :rules="rules" label-width="80px" :inline="false">
                 <el-form-item label="分类名称" prop="name">
                     <el-input v-model="form.name"></el-input>
@@ -31,9 +31,9 @@
 </template>
 
 <script setup>
-import { ref,reactive } from 'vue'
+import {ref, reactive, computed} from 'vue'
 import AsideList from './AsideList.vue'
-import { getImageClassList,createImageClass,updateImageClass } from "~/api/image_class.js"
+import { getImageClassList,createImageClass,updateImageClass,deleteImageClass } from "~/api/image_class.js"
 import { SuccessMsg } from "~/composable/utils.js"
 //导入之前新建的表单模板
 import FormDrawer from "./FormDrawer.vue"
@@ -73,11 +73,17 @@ function getImageData(p = null) {
 }
 
 getImageData()
+//图库分类的id
+const editId = ref(0)
+
+//动态设定是新建还是修改标题
+const drawerTitle = computed( () => editId.value ? "修改" :"新建")
 
 //新建图库分类
 const formDrawerRef = ref(null)
 //激活，打开新建窗口
 const imageHandleCreate = () => {
+    editId.value = 0
     form.name = ""
     form.order = 50
     formDrawerRef.value.open()
@@ -108,10 +114,12 @@ const imageHandleSubmit = () => {
     formRef.value.validate((valid) => {
         if(!valid) return
         formDrawerRef.value.showLoading()
-        createImageClass(form).then( res => {
-            SuccessMsg("添加图片分类成功")
+
+        const fun = editId.value ? updateImageClass(editId.value,form) : createImageClass(form)
+        fun.then( res => {
+            SuccessMsg(drawerTitle.value + "图片分类成功")
             //从新加载分类数据
-            getImageData(1)
+            getImageData(editId.value ? currentPage.value : 1)
             //关闭新增图片的弹框
             formDrawerRef.value.close()
         }).finally( () => {
@@ -122,14 +130,26 @@ const imageHandleSubmit = () => {
     })
 }
 
-
 //修改图库分类信息
-const imageHadleEdit = (row) => {
+const imageHandleEdit = (row) => {
+    editId.value = row.id
     form.name = row.name
     form.order = row.order
     formDrawerRef.value.open()
 }
 
+//删除图片分类
+const imageHandleDelete = id => {
+  loading.value = true
+  deleteImageClass(id)
+      .then(res => {
+          SuccessMsg("删除成功")
+          getImageData()
+      }).finally( () => [
+          loading.value = false
+
+      ])
+}
 </script>
 
 <style>

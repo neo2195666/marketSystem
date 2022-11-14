@@ -103,7 +103,6 @@
         panels.value = res.panels
     })
 
-
     const goods = ref([])
     const order = ref([])
     getStatistics2().then( res => {

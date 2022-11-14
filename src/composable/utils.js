@@ -1,11 +1,12 @@
 //导入消息盒子
 import { ElNotification,ElMessageBox } from 'element-plus'
-import nprogress from 'nprogress'
+import nprogressRef from 'nprogress'
 
-export function SuccessMsg(title){
+export function SuccessMsg(title,dangerouslyUseHTMLString = true){
     ElNotification({
         title,
         type: 'success',
+        dangerouslyUseHTMLString
     })
 }
 
@@ -38,11 +39,10 @@ export function logoutFunction(context = "提示内容",type = "Warning",title =
 
 //显示全屏loading
 export function showFullLoading(){
-    nprogress.start()
+    nprogressRef.start()
 }
-
 
 //隐藏全屏loading
 export function hideFullLoading(){
-    nprogress.done()
+    nprogressRef.done()
 }

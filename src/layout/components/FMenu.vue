@@ -11,7 +11,7 @@
                         <el-icon>
                             <component :is="item.icon" class="text-3xl"></component>
                         </el-icon>
-                        <span>{{ item.name }}</span>
+                        <span class="text-2xl">{{ item.name }}</span>
                     </template>
 
                     <!-- 循环展示2级菜单 -->
@@ -55,6 +55,7 @@ const asideMenus = computed( () => store.state.menus)
 const handleSelect = (e) => {
     router.push(e)
 }
+
 </script>
 
 <style scoped>
