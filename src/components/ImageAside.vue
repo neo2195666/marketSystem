@@ -2,7 +2,7 @@
     <el-aside width="320px" class="image-aside" v-loading="loading">
             <!-- 侧边分类列表 -->
             <div class="top">
-                <AsideList @delete="imageHandleDelete(item.id)" @edit="imageHandleEdit(item)" :active="activeId == item.id" v-for="(item,index) in list" :key="index">
+                <AsideList @click="handleChangeActiveID(item.id)" @delete="imageHandleDelete(item.id)" @edit="imageHandleEdit(item)" :active="activeId == item.id" v-for="(item,index) in list" :key="index">
                     {{ item.name }}
                 </AsideList>
 
@@ -43,8 +43,7 @@ const loading = ref(false)
 
 const list = ref([])
 
-//激活分类第一个选项
-const activeId = ref(0)
+
 
 //分页设置
 const currentPage = ref(1)
@@ -65,7 +64,7 @@ function getImageData(p = null) {
         total.value = res.totalCount
         //:actvie是vue自带的激活，当第一个的值存在的时候，把它激活
         let item = list.value[0]
-        if(item) activeId.value = item.id
+        if(item) handleChangeActiveID(item.id)
     })
     .finally( () => {
         loading.value = false
@@ -147,9 +146,17 @@ const imageHandleDelete = id => {
           getImageData()
       }).finally( () => [
           loading.value = false
-
       ])
 }
+
+//选中图库分类id
+const activeId = ref(0)
+const emit = defineEmits(["change"])
+function handleChangeActiveID(id){
+    activeId.value = id
+    emit("change",id)
+}
+
 </script>
 
 <style>

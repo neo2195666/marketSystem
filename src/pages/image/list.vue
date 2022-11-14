@@ -7,10 +7,10 @@
       
       <el-container>
             <!-- 侧边栏 -->
-            <ImageAside ref="ImageAsideRef" />
+            <ImageAside ref="ImageAsideRef" @change="handleAsideChange"/>
 
             <!-- 主体部分 -->
-            <ImageMain/>
+            <ImageMain ref="imageMainRef"/>
       
       </el-container>
     </el-container>
@@ -28,8 +28,11 @@ const ImageAsideRef = ref(null)
 
 const handleOpenCreate = () => ImageAsideRef.value.imageHandleCreate()
 
-</script>
+const imageMainRef = ref(null)
 
+const handleAsideChange = image_class_id => imageMainRef.value.loadData(image_class_id)
+
+</script>
 
 <style>
     .image-header{
