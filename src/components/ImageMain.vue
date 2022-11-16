@@ -32,12 +32,20 @@
             </div>
 
         </el-main>
+
+        <el-drawer v-model="drawer" title="图片上传">
+            <UploadFile/>
+        </el-drawer>
 </template>
 
 <script setup>
 import { getImageList,updateImage,deleteImage } from "~/api/image.js"
 import { ref } from 'vue'
 import { showPrompt,SuccessMsg } from "~/composable/utils.js"
+import UploadFile from "~/components/uploadFile.vue"
+//上传图片
+const drawer = ref(false)
+const openUploadFile = () => drawer.value.true
 
 //分页设置
 const currentPage = ref(1)
@@ -103,7 +111,8 @@ const handleDeleteImage = (id) => {
 }
 
 defineExpose({
-    loadData
+    loadData,
+    openUploadFile
 })
 
 </script>

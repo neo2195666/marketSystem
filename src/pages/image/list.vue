@@ -1,18 +1,19 @@
 <template>
-<el-container class="bg-white rounded text-2xl" :style="{ height : ( h + 'px')}">
-      
-      <el-header class="image-header">
-          <el-button type="primary" size="default" @click="handleOpenCreate">新建分类</el-button>   
-      </el-header>
-      
-      <el-container>
+    <el-container class="bg-white rounded text-2xl" :style="{ height : ( h + 'px')}">
+        
+        <el-header class="image-header">
+            <el-button type="primary" size="default" @click="handleOpenCreate">新建分类</el-button> 
+            <el-button type="warning" size="default" @click="handleOpenUploadFile">图片上传</el-button>     
+        </el-header>
+        
+        <el-container>
             <!-- 侧边栏 -->
             <ImageAside ref="ImageAsideRef" @change="handleAsideChange"/>
 
             <!-- 主体部分 -->
             <ImageMain ref="imageMainRef"/>
-      
-      </el-container>
+        
+        </el-container>
     </el-container>
 </template>
 
@@ -32,12 +33,14 @@ const imageMainRef = ref(null)
 
 const handleAsideChange = image_class_id => imageMainRef.value.loadData(image_class_id)
 
+const handleOpenUploadFile = () => imageMainRef.value.openUploadFile()
+
 </script>
 
 <style>
-    .image-header{
+    .image-header .image-upload{
         border-bottom: 1px solid #eeeeee;
-        @apply flex items-center
+        @apply flex items-center justify-center
     }
 
     .image-aside{
