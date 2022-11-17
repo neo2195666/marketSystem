@@ -104,7 +104,7 @@ const onSubmit = () => {
     loading.value = true
     //调用登录的api
     store.dispatch("login",form).then( () => {
-      SuccessMsg("登录成功");
+      SuccessMsg("登录成功","success");
       router.push("/")
     }).finally(() => {
           loading.value = false
