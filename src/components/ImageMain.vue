@@ -34,7 +34,7 @@
         </el-main>
 
         <el-drawer v-model="drawer" title="图片上传">
-            <UploadFile/>
+            <UploadFile :data="{ image_class_id }" @success="handleUploadSuccess"/>
         </el-drawer>
 </template>
 
@@ -45,7 +45,7 @@ import { showPrompt,SuccessMsg } from "~/composable/utils.js"
 import UploadFile from "~/components/uploadFile.vue"
 //上传图片
 const drawer = ref(false)
-const openUploadFile = () => drawer.value.true
+const openUploadFile = () => drawer.value = true
 
 //分页设置
 const currentPage = ref(1)
@@ -89,7 +89,7 @@ const handleEidt = (item) => {
         loading.value = true
         updateImage(item.id,res.value)
         .then( res => {
-            SuccessMsg("修改成功")
+            SuccessMsg("修改成功","success")
             getImageData()
         })
         .finally(() => {
@@ -102,13 +102,17 @@ const handleEidt = (item) => {
 const handleDeleteImage = (id) => {
     loading.value = true
     deleteImage([id]).then( () => {
-       SuccessMsg("删除成功!")
+       SuccessMsg("删除成功!","success")
        getImageData();
     })
     .finally( () => {
         loading.value = false
     })
 }
+
+//上传成功
+const handleUploadSuccess = () => getImageData(1)
+
 
 defineExpose({
     loadData,

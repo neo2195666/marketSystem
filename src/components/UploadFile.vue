@@ -1,17 +1,41 @@
 <template>
-    <el-upload class="upload-demo" drag action="https://run.mocky.io/v3/9d059bf9-4660-45f2-925d-ce80ad6c4d15" multiple>
+    <el-upload drag :action="uploadImageAction" multiple :headers="{ token }" name="img" :data="data" :on-success="uploadSuccess" :on-error="uploadError">
       <el-icon class="el-icon--upload"><upload-filled /></el-icon>
       <div class="el-upload__text">
-        Drop file here or <em>click to upload</em>
+        将文件拖动到这里或者<em>单击上传</em>
       </div>
       <template #tip>
           <div class="el-upload__tip">
-            jpg/png files with a size less than 500kb
+            jpg/png 格式小于 500kb
           </div>
       </template>
     </el-upload>
 </template>
 
 <script setup>
+import { getToken} from "../composable/auth.js";
 import { UploadFilled } from '@element-plus/icons-vue'
+import { uploadImageAction } from '~/api/image.js'
+import { SuccessMsg } from '~/composable/utils.js'
+
+const token = getToken()
+
+defineProps({
+  data:Object
+})
+
+const emit = defineEmits(["success"])
+
+const uploadSuccess = (response, uploadFile, uploadFiles) => {
+    console.log(response)
+    emit('success',{
+      response, uploadFile, uploadFiles
+    })
+}
+
+const uploadError = (error, uploadFile, uploadFiles) => {
+    let msg = JSON.parse(error.message).msg || "上传失败"
+    SuccessMsg(msg,"error")
+    console.log(msg)
+}
 </script>

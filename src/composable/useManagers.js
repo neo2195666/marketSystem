@@ -1,8 +1,8 @@
-import {reactive, ref} from "vue";
-import {logoutApi, updatePassword} from "~/api/manager.js";
-import {logoutFunction, SuccessMsg} from "~/composable/utils.js";
-import {useStore} from "vuex";
-import {useRouter } from "vue-router";
+import { reactive, ref } from "vue";
+import { logoutApi, updatePassword } from "~/api/manager.js";
+import { logoutFunction, SuccessMsg } from "~/composable/utils.js";
+import { useStore } from "vuex";
+import { useRouter } from "vue-router";
 
 
 export function useRePassword() {
@@ -90,7 +90,7 @@ export function useLogout(){
                 //跳转回登录页面
                 router.push("/login")
                 //提示退出成功
-                SuccessMsg("已退出！准备去撸串～")
+                SuccessMsg("已退出！🍺～")
             })
         })
     }

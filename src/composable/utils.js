@@ -2,24 +2,24 @@
 import { ElNotification,ElMessageBox } from 'element-plus'
 import nprogressRef from 'nprogress'
 
-export function SuccessMsg(title,dangerouslyUseHTMLString = true){
+export function SuccessMsg(title,type,dangerouslyUseHTMLString = true){
     ElNotification({
         title,
-        type: 'success',
+        type,
         dangerouslyUseHTMLString
     })
 }
 
 export function loginFailMsg(error){
     ElNotification({
-        message: error.response.data.msg || "登录失败",
+        message: error.response.data.msg || "登录失败🙅",
         type: 'error',
     })
 }
 
 export function loginFirst(){
     ElNotification({
-        message: "兄弟，你得先登录!",
+        message: "亲亲，请先登录!🌚",
         type: 'error',
     })
 }
