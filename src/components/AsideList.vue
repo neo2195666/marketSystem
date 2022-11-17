@@ -5,14 +5,15 @@
                     <el-icon><Edit :size="12"/></el-icon>
                 </el-button>
 
-                <el-popconfirm title="确认要删除分类吗?" confirm-button-text="是" cancel-button-text="否" confirm-button-type="danger" @confirm="$emit('delete')">
-                  <template #reference>
-                      <el-button text type="primary" class="px-1" size="default">
-                          <el-icon><Close :size="12"/></el-icon>
-                      </el-button>
-                  </template>
-                </el-popconfirm>
-
+                <span @click.stop="() =>{}">
+                    <el-popconfirm title="确认要删除分类吗?" confirm-button-text="是" cancel-button-text="否" confirm-button-type="danger" @confirm="$emit('delete')">
+                    <template #reference>
+                        <el-button text type="primary" class="px-1" size="default">
+                            <el-icon><Close :size="12"/></el-icon>
+                        </el-button>
+                    </template>
+                    </el-popconfirm>
+                </span>
         </div>
 </template>
 
