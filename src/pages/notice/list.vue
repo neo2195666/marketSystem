@@ -1,7 +1,7 @@
 <template>
     <el-card shadow="hover" class="border-0">
         <div class="flex items-center justify-between mb-4">
-            <el-button type="primary" size="default" >新建</el-button>
+            <el-button type="primary" size="default" @click="handleCreate">新建</el-button>
 
             <el-tooltip effect="dark" content="点击刷新" placement="top">
                 <el-button text size="default" @click="getTableData">
@@ -15,7 +15,7 @@
             <el-table-column prop="create_time" label="创建时间" width="380" />
             <el-table-column label="操作" width="180" align="center">
                 <template #default="scope">
-                    <el-button size="small" type="primary">编辑</el-button>
+                    <el-button size="small" type="primary" @click="handleUpdate(scope.row)">编辑</el-button>
 
                     <el-popconfirm @confirm="handleDeleteNotice(scope.row.id)" title="确认删除公告?" confirm-button-text="是" cancel-button-text="否" confirm-button-type="danger">
                         <template #reference>
@@ -28,12 +28,14 @@
         </el-table>
 
         <div class="bottom flex justify-center items-center mt-5">
-            <el-pagination background layout="prev, pager, next" :total="total" :current-page="currentPage" :page-size="limit" @current-change="getImageData"/>
+            <el-pagination background layout="prev, pager, next" :total="total" :current-page="currentPage" :page-size="limit" @current-change="getNoticeData"/>
         </div>
 
-        <FormDrawer ref="formDrawerRef" title="新增" @submit="handleSubmit">
+        <FormDrawer ref="formDrawerRef" :title="drawerTitle" @submit="handleSubmit">
+
             <el-form :model="form" ref="formRef" :rules="rules" label-width="80px" :inline="false">
-                <el-form-item label="公告标题" placeholder="公告标题" prop="title">
+
+              <el-form-item label="公告标题" placeholder="公告标题" prop="title">
                     <el-input v-model="form.title"></el-input>
                 </el-form-item>
 
@@ -50,14 +52,16 @@
 
 
 <script setup>
-import { ref,reactive } from "vue"
-import { getNoticeList,createNotice } from "~/api/notice.js"
+import {ref, reactive, computed} from "vue"
+import { getNoticeList,updateNotice,deleteNotice,createNotice } from "~/api/notice.js"
 import FormDrawer from "~/components/FormDrawer.vue"
+import {SuccessMsg} from "../../composable/utils.js";
 
 const tableData = ref([])
 
 const formDrawerRef = ref(null)
-
+const editId = ref(0)
+const drawerTitle = computed( () => editId.value ? "修改" : "新增")
 
 //加载图片动画效果
 const loading = ref(false)
@@ -82,7 +86,7 @@ function getNoticeData(p = null) {
     getNoticeList(currentPage.value)
     .then( res => {
         tableData.value = res.list
-        total.value = res.totalCount
+        total.value = res.totalColumn
         console.log(res);
     })
     .finally( () => {
@@ -93,31 +97,64 @@ function getNoticeData(p = null) {
 getNoticeData()
 
 //删除公告
-const handleDeleteNotice = () => {
-
+const handleDeleteNotice = (id) => {
+    loading.value = true
+    deleteNotice(id).
+    then( res => {
+        SuccessMsg("删除成功","success")
+        getNoticeData()
+    })
+        .finally( () => loading.value = false )
 }
 
 //新增公告
 const handleSubmit = () =>{
+    editId.value = 0
+    formRef.value.validate( (valid) => {
+        if(!valid) return
 
+        formDrawerRef.value.showLoading()
+
+        createNotice(form)
+            .then( ()=> {
+                SuccessMsg("创建成功","success")
+                getNoticeData()
+                formDrawerRef.value.close()
+            })
+            .finally( () => {
+                formDrawerRef.value.hideLoading()
+            })
+    })
 }
 
 //打开表单
 const handleCreate = () => {
-    formDrawer.value.open()
+    formDrawerRef.value.open()
 }
 
 //抽屉表单
 const formRef = ref(null)
 const form = reactive({
-    title:"",
-    content:""
+    title: "",
+    content: ""
 })
 
 const rules = {
-    title: [],
-    content: []
+    title: [{
+      required: true,
+      message: '公告标题不能为空',
+      trigger: 'blur'
+    }],
+    content: [{
+      required: true,
+      message: '公告内容不能为空',
+      trigger: 'blur'
+    }]
 }
 
-
+//编辑公告
+const handleUpdate = (row) => {
+    editId.value = row.id
+    formDrawerRef.value.open()
+}
 </script>
